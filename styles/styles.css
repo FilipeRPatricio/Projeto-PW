@@ -20,6 +20,18 @@ body {
     font-family: Verdana, Helvetica, sans-serif;
 }
 
+/* Estilo do título*/
+.page-title {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
+    margin: var(--root-space) 0;
+    color: var(--root-primary-color);
+    background: none; /* Remove a barra azul */
+    padding: 0; /* Remove padding extra */
+}
+
+
 footer {
     width: calc(100% - 2 * var(--root-space));
     margin-top: auto;
@@ -58,7 +70,65 @@ footer {
     text-align: center;
 }
 
+/*Barra de navegação*/
 .navigator-bar .area-link:hover {
     background-color: var(--root-primary-color);
     color: var(--root-background-color);
+}
+
+/*Tabela*/
+
+.event-table {
+    align-content:center;
+    width: 70%;
+    border-collapse: collapse;
+    margin: auto;
+    font-size: 1rem;
+    text-align: left;
+    border-radius: var(--root-border-radius);
+    overflow: hidden /*para o conteudo respeitar os cantos arredondados*/
+}
+
+.event-table th {
+    background-color: var(--root-primary-color);
+    color: var(--root-background-color);
+    padding: var(--root-half-space);
+    border: 1px solid var(--root-primary-color);
+}
+
+.event-table td {
+    padding: var(--root-half-space);
+    border: 1px solid #ffffff; /* Bordas brancas para linhas mais suaves */
+}
+
+.event-table tr:nth-child(even) {
+    background-color: rgb(77, 131, 188); /* Azul mais escuro */
+}
+
+.event-table tr:nth-child(odd) {
+    background-color: var(--root-background-color);}
+
+/* botões da tabela */
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--root-space);
+}
+
+.action-button {
+    background-color: var(--root-primary-color);
+    color: var(--root-background-color);
+    border: none;
+    border-radius: var(--root-quarter-space);
+    padding: var(--root-half-space) var(--root-space);
+    margin: 0 var(--root-half-space);
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.action-button:hover {
+    background-color: var(--root-background-color);
+    color: var(--root-primary-color);
+    border: 1px solid var(--root-primary-color);
 }
