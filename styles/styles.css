@@ -38,3 +38,27 @@ footer {
     border-radius: var(--root-border-radius) var(--root-border-radius) 0 0;
 }
 
+.navigator-bar{
+    display: flex;
+    justify-content: start;
+    background-color: var(--root-secondary-background-color);
+    padding:var(--root-half-space);
+    border-bottom: 1 px solid var (--root-primary-color);
+}
+
+.navigator-bar .area-link {
+    text-decoration: none;
+    color: var(--root-primary-color);
+    background-color: var(--root-background-color);
+    padding: var(--root-half-space) var(--root-space);
+    margin-right: var(--root-half-space);
+    border: 1px solid var(--root-primary-color);
+    border-radius: var(--root-quarter-space);
+    font-weight: bold;
+    text-align: center;
+}
+
+.navigator-bar .area-link:hover {
+    background-color: var(--root-primary-color);
+    color: var(--root-background-color);
+}
