@@ -1,0 +1,40 @@
+:root {
+    --root-primary-color: #003;
+    --root-background-color: #cdf;
+    --root-secondary-background-color: #eee;
+    --root-icon-size: 150px;
+    --root-space: 1rem;
+    --root-half-space: calc(var(--root-space) / 2);
+    --root-quarter-space: calc(var(--root-space) / 4);
+    --root-double-space: calc(var(--root-space) * 2);
+    --root-border-radius: var(--root-space);
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 2 * var(--root-space));
+    width: calc(100% - 2 * var(--root-space));
+    margin: var(--root-space);
+    background-color: var(--root-secondary-background-color);
+    font-family: Verdana, Helvetica, sans-serif;
+}
+
+footer {
+    width: calc(100% - 2 * var(--root-space));
+    margin-top: auto;
+    padding: var(--root-space);
+    color: var(--root-background-color);
+    background-color: var(--root-primary-color);
+    border-radius: var(--root-border-radius);
+    text-align: center;
+}
+
+.name {
+    margin: 0;
+    padding: var(--root-double-space);
+    color: var(--root-background-color);
+    background-color: var(--root-primary-color);
+    border-radius: var(--root-border-radius) var(--root-border-radius) 0 0;
+}
+
