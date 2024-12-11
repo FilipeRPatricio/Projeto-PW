@@ -194,9 +194,9 @@ class EventManager {
      * Initializes the button variables
      */
     initializeButtons() {
-        this.createButton = document.getElementById("create");
-        this.editButton = document.getElementById("edit");
-        this.deleteButton = document.getElementById("delete");
+        this.createButton = document.getElementById("Criar");
+        this.editButton = document.getElementById("Editar");
+        this.deleteButton = document.getElementById("Apagar");
 
         this.setActions();
     }
@@ -243,6 +243,4 @@ class MemberManager {
 
 window.onload = function () {
     const eventManager = new EventManager();
-
-    
 }

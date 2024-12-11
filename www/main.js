@@ -40,7 +40,7 @@ const links = [
   table.className = 'event-table';
 
   const thead = document.createElement('thead');
-  const headRow = document.createElement('tr');
+  const headerRow = document.createElement('tr');
   ['ID', 'Tipo', 'Descritivo', 'data'].forEach(text => {
     const th = document.createElement('th');
     th.textContent = text;
@@ -61,7 +61,7 @@ const links = [
 events.forEach(event => {
     const row = document.createElement('tr');
     Object.values(event).forEach(value => {
-        const td = document.createTreeWalker('td');
+        const td = document.createElement('td');
         td.textContent = value;
         row.appendChild(td);
     });
@@ -79,6 +79,7 @@ buttonContainer.className = 'button-container';
   const button = document.createElement('button');
   button.className = 'action-button';
   button.textContent = action;
+  button.id = action;
   buttonContainer.appendChild(button);
 });
 
