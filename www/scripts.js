@@ -71,7 +71,8 @@ class Event {
      * @param {string} description - O descritivo para o evento
      * @param {Date | string} date - A data para o evento
      */
-    constructor(type, description, date) {
+    constructor(id, type, description, date) {
+        this.#id = id;
         type === EventType ? this.#type = type : this.#type = "";
         this.#description = description;
         this.#date = date;
@@ -128,6 +129,11 @@ class Member {
     #favoriteEventTypes;
 
     /**
+     * @property {Event[]} registeredEvents - Eventos em que o membro está inscrito
+     */
+    #registeredEvents;
+
+    /**
      * @constructs Member
      * @param {string} name 
      */
@@ -160,6 +166,17 @@ class Member {
 
 
 /**
+ * @class Gestor de Tipos de Eventos (criar, editar, apagar)
+ */
+class EventTypeManager {
+    /**
+     * @property {number} currentId - Id atual dos tipos de eventos
+     * @static
+     */
+    static currentId;
+}
+
+/**
  * @class Gestor de Eventos (criar, editar, apagar)
  */
 class EventManager {
@@ -167,6 +184,12 @@ class EventManager {
      * @property {Event[]} eventList - Lista de eventos disponíveis
      */
     eventList;
+
+    /**
+     * @property {number} currentId - Id atual dos eventos
+     * @static
+     */
+    static currentId;
 
     /**
      * @property {Button} createButton - Botão para criar novos eventos
@@ -187,6 +210,7 @@ class EventManager {
      * @constructs EventManager
      */
     constructor() {
+        this.currentId = 1;
         this.initializeButtons();
     }
 
@@ -237,8 +261,13 @@ class EventManager {
  * @class Gestor de Membros (criar, editar, apagar)
  */
 class MemberManager {
-
+    /**
+     * @property {number} currentId - Id atual dos membros
+     * @static
+     */
+    static currentId;
 }
+
 
 
 window.onload = function () {
