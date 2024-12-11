@@ -1,3 +1,5 @@
+"use strict";
+
 const body = document.body;
 
 //Cabeçalho principal
@@ -56,7 +58,7 @@ const links = [
   { id: 4, tipo: 'Pista', desc: 'Teste Pista Dezembro', data: '2024-12-15' },
 ];
 
-events.forEatch(event => {
+events.forEach(event => {
     const row = document.createElement('tr');
     Object.values(event).forEach(value => {
         const td = document.createTreeWalker('td');
