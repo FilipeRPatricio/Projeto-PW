@@ -163,8 +163,24 @@ class Member {
  * @class Gestor de Eventos (criar, editar, apagar)
  */
 class EventManager {
+    /**
+     * @property {Event[]} eventList - Lista de eventos disponíveis
+     */
+    eventList;
+
+    /**
+     * @property {Button} createButton - Botão para criar novos eventos
+     */
     createButton;
+
+    /**
+     * @property {Button} editButton - Botão para editar eventos
+     */
     editButton;
+
+    /**
+     * @property {Button} deleteButton - Botão para apagar eventos
+     */
     deleteButton;
 
     /**
@@ -201,6 +217,18 @@ class EventManager {
             console.log("delete");
         });
     }
+
+    createEvent() {
+
+    }
+
+    editEvent() {
+        
+    }
+
+    deleteEvent() {
+
+    }
 }
 
 
@@ -215,4 +243,6 @@ class MemberManager {
 
 window.onload = function () {
     const eventManager = new EventManager();
+
+    
 }
