@@ -230,20 +230,38 @@ class EventManager {
      */
     setActions() {
         this.createButton.addEventListener("click", () => {
+            this.createEvent();
             console.log("create");
         });
 
         this.editButton.addEventListener("click", () => {
+            this.editEvent();
             console.log("edit");
         });
 
         this.deleteButton.addEventListener("click", () => {
+            this.deleteEvent();
             console.log("delete");
+        });
+    }
+
+    updateEvents() {
+        events.forEach(event => {
+            const row = document.createElement('tr');
+
+            Object.values(event).forEach(value => {
+                const td = document.createElement('td');
+                td.textContent = value;
+                row.appendChild(td);
+            });
+
+            tbody.appendChild(row);
         });
     }
 
     createEvent() {
 
+        updateEvents();
     }
 
     editEvent() {

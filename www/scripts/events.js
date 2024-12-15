@@ -2,19 +2,20 @@
 
 const body = document.body;
 
-//Cabeçalho principal
+// Cabeçalho principal
 const header = document.createElement('h1');
 header.className ='name';
 header.textContent = 'ESTSBike - Clube de Ciclismo';
 body.appendChild(header);
 
-//barra navegação
+// Barra navegação
 const navBar = document.createElement('div');
 navBar.className = 'navigator-bar';
 
+// Botões para a Página de Membros, Eventos e Tipos de Eventos
 const links = [
     { id: 'Membros', href: 'members.html', text: 'Membros' },
-    { id: 'Eventos', href: 'events.html', text: 'Eventos' },
+    { id: 'Eventos', href: 'index.html', text: 'Eventos' },
     { id: 'Tipos-de-Eventos', href: 'eventType.html', text: 'Tipos de Eventos' },
   ];
 
@@ -29,16 +30,19 @@ const links = [
 
   body.appendChild(navBar);
 
-  // Título da pagina
+  // Título da página
   const pageTitle = document.createElement('h1');
   pageTitle.className = 'page-title';
   pageTitle.textContent = 'Eventos';
   body.appendChild(pageTitle);
 
-  //Tabela de eventos
+
+
+  // Tabela de Eventos
   const table = document.createElement('table');
   table.className = 'event-table';
 
+  // Header
   const thead = document.createElement('thead');
   const headerRow = document.createElement('tr');
   ['ID', 'Tipo', 'Descritivo', 'data'].forEach(text => {
@@ -50,6 +54,8 @@ const links = [
   thead.appendChild(headerRow);
   table.appendChild(thead);
 
+  // Corpo
+  // TODO: Substituir body de teste por javascript
   const tbody = document.createElement('tbody');
   const events = [
   { id: 1, tipo:'Estrada', desc: 'Teste Estrada Novembro', data: '2024-11-01' },
@@ -71,11 +77,13 @@ events.forEach(event => {
 table.appendChild(tbody);
 body.appendChild(table);
 
-//Botoes da tabela
+// Botões para Criar, Editar e Apagar Eventos
 const buttonContainer = document.createElement('div');
 buttonContainer.className = 'button-container';
 
-['Criar', 'Editar', 'Apagar'].forEach(action => {
+const actionButtons = ['Criar', 'Editar', 'Apagar'];
+
+actionButtons.forEach(action => {
   const button = document.createElement('button');
   button.className = 'action-button';
   button.textContent = action;
