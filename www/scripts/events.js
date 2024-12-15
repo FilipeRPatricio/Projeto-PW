@@ -57,12 +57,12 @@ const links = [
   // Corpo
   // TODO: Substituir body de teste por javascript
   const tbody = document.createElement('tbody');
-  const events = [
-  { id: 1, tipo:'Estrada', desc: 'Teste Estrada Novembro', data: '2024-11-01' },
-  { id: 2, tipo: 'BTT', desc: 'Teste BTT', data: '2024-11-30' },
-  { id: 3, tipo: 'Estrada', desc: 'Teste Estrada Dezembro', data: '2024-12-01' },
-  { id: 4, tipo: 'Pista', desc: 'Teste Pista Dezembro', data: '2024-12-15' },
-  ];
+  // const events = [
+  // { id: 1, tipo:'Estrada', desc: 'Teste Estrada Novembro', data: '2024-11-01' },
+  // { id: 2, tipo: 'BTT', desc: 'Teste BTT', data: '2024-11-30' },
+  // { id: 3, tipo: 'Estrada', desc: 'Teste Estrada Dezembro', data: '2024-12-01' },
+  // { id: 4, tipo: 'Pista', desc: 'Teste Pista Dezembro', data: '2024-12-15' },
+  // ];
 
 // events.forEach(event => {
 //     const row = document.createElement('tr');

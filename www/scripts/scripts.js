@@ -3,7 +3,9 @@
 
 /* ENUM? */
 /**
- * @class Tipos de Eventos
+ * Classe EventType
+ * 
+ * @class Tipos de Eventos de Ciclismo.
  */
 class EventType {
     /**
@@ -18,9 +20,12 @@ class EventType {
 
     /**
      * @constructs EventType
+     * 
+     * @param {number} id - Identificador único do tipo de evento
      * @param {string} description - Descritivo para o tipo de evento
      */
-    constructor(description) {
+    constructor(id, description) {
+        this.#id = id;
         this.#description = description;
     }
 
@@ -42,9 +47,11 @@ class EventType {
 
 
 /**
- * @class Evento Concreto
+ * Classe Events
+ * 
+ * @class Evento de Ciclismo.
  */
-class Event {
+class Events {
     /**
      * @property {number} id - Identificador único do evento
      */
@@ -66,14 +73,18 @@ class Event {
     #date;
 
     /**
-     * @constructs Event
+     * @constructs Events
+     * 
+     * @param {number} id - Identificador único do evento
      * @param {EventType} type - O tipo de evento para o evento
      * @param {string} description - O descritivo para o evento
      * @param {Date | string} date - A data para o evento
      */
     constructor(id, type, description, date) {
         this.#id = id;
-        type === EventType ? this.#type = type : this.#type = "";
+        if (type instanceof EventType) {
+            this.#type = type;
+        }
         this.#description = description;
         this.#date = date;
     }
@@ -110,7 +121,9 @@ class Event {
 
 
 /**
- * @class Membro do Clube
+ * Classe Member
+ * 
+ * @class Membro do Clube de Ciclismo.
  */
 class Member {
     /**
@@ -129,15 +142,18 @@ class Member {
     #favoriteEventTypes;
 
     /**
-     * @property {Event[]} registeredEvents - Eventos em que o membro está inscrito
+     * @property {Events[]} registeredEvents - Eventos em que o membro está inscrito
      */
     #registeredEvents;
 
     /**
      * @constructs Member
+     * 
+     * @param {number} id - Identificador único do membro
      * @param {string} name 
      */
-    constructor(name) {
+    constructor(id, name) {
+        this.#id = id;
         this.#name = name;
     }
 
@@ -161,29 +177,56 @@ class Member {
     get favoriteEventTypes() {
         return this.#favoriteEventTypes;
     }
+
+    /**
+     * @property {Events[]} registeredEvents - Eventos em que este membro está inscrito
+     */
+    get registeredEvents() {
+        return this.#registeredEvents;
+    }
 }
 
 
 
 /**
- * @class Gestor de Tipos de Eventos (criar, editar, apagar)
+ * Classe EventTypeManager
+ * 
+ * @class Gestor de Tipos de Eventos (criar, editar, apagar).
  */
 class EventTypeManager {
+    /**
+     * @property {EventType[]} typeList - Lista de tipos de eventos
+     * @static
+     */
+    static typeList;
+
     /**
      * @property {number} currentId - Id atual dos tipos de eventos
      * @static
      */
     static currentId;
+
+    constructor() {
+        // Caso o id não tenha sido inicializado
+        if (EventTypeManager.currentId === void 0) {
+            EventTypeManager.currentId = 1;
+        }
+    }
 }
 
+
+
 /**
- * @class Gestor de Eventos (criar, editar, apagar)
+ * Classe EventManager
+ * 
+ * @class Gestor de Eventos (criar, editar, apagar).
  */
 class EventManager {
     /**
-     * @property {Event[]} eventList - Lista de eventos disponíveis
+     * @property {Events[]} eventList - Lista de eventos disponíveis
+     * @static
      */
-    eventList;
+    static eventList;
 
     /**
      * @property {number} currentId - Id atual dos eventos
@@ -210,23 +253,34 @@ class EventManager {
      * @constructs EventManager
      */
     constructor() {
-        this.currentId = 1;
+        // Caso o id não tenha sido inicializado
+        if (EventManager.currentId === void 0) {
+            EventManager.currentId = 1;
+        }
+
+        // Caso a lista de eventos não tenha sido inicializada
+        if (EventManager.eventList === void 0) {
+            EventManager.eventList = [];
+        }
+
         this.initializeButtons();
     }
 
     /**
-     * Initializes the button variables
+     * Inicializa os botões de ação.
      */
     initializeButtons() {
         this.createButton = document.getElementById("Criar");
         this.editButton = document.getElementById("Editar");
         this.deleteButton = document.getElementById("Apagar");
 
-        this.setActions();
+        if (this.createButton) {
+            this.setActions();
+        }
     }
 
     /**
-     * Sets the buttons onClick actions
+     * Adiciona as ações ao clicar num dos botões.
      */
     setActions() {
         this.createButton.addEventListener("click", () => {
@@ -245,22 +299,61 @@ class EventManager {
         });
     }
 
+    /**
+     * Apaga os eventos presentes na tabela, de forma a evitar duplicados
+     * e adiciona todos os eventos presentes na lista de eventos.
+     */
     updateEvents() {
-        events.forEach(event => {
-            const row = document.createElement('tr');
+        // Apagar o body da tabela para evitar duplicados
+        tbody.replaceChildren();
 
-            Object.values(event).forEach(value => {
-                const td = document.createElement('td');
-                td.textContent = value;
-                row.appendChild(td);
-            });
+        // Criar uma linha na tabela para cada evento
+        EventManager.eventList.forEach(event => {
+            const row = this.#addTableRow(event);
 
             tbody.appendChild(row);
         });
     }
 
-    createEvent() {
+    /**
+     * Cria uma nova linha na tabela e adiciona-lhe os valores de um evento.
+     * 
+     * @param {Events} event - o evento a adicionar na nova linha
+     * @returns uma linha ('tr') com os valores do evento
+     */
+    #addTableRow(event) {
+        let result = document.createElement('tr');
 
+        // Array para iterar sobre cada parâmetro
+        const eventValues = [
+            event.id,
+            event.type.description,
+            event.description,
+            event.date
+        ]
+
+        // Adicionar uma coluna na tabela para cada parâmetro no evento
+        eventValues.forEach(parameter => {
+            const td = document.createElement('td');
+            td.textContent = parameter;
+            result.appendChild(td);
+        });
+
+        return result;
+    }
+
+
+
+    createEvent() {
+        // Mostrar página para criar evento
+
+        // Teste
+        const type = new EventType(1, "BTT");
+        EventManager.eventList.push(new Events(EventManager.currentId, type, "Evento", "25-12-2024"));
+
+        // Adicionar evento à lista de eventos
+
+        EventManager.currentId++;
         this.updateEvents();
     }
 
@@ -280,15 +373,40 @@ class EventManager {
  */
 class MemberManager {
     /**
+     * @property {Member[]} memberList - Lista dos membros disponíveis
+     * @static
+     */
+    static memberList;
+
+    /**
      * @property {number} currentId - Id atual dos membros
      * @static
      */
     static currentId;
+
+    constructor() {
+        // Caso o id não tenha sido inicializado
+        if (MemberManager.currentId === void 0) {
+            MemberManager.currentId = 1;
+        }
+    }
 }
 
 
 
 window.onload = function () {
+    // TODO: Change to singleton instances
+    const eventTypeManager = new EventTypeManager();
     const eventManager = new EventManager();
-    eventManager.updateEvents();
+    const memberManager = new MemberManager();
+    
+    switch(document.body.id) {
+        case "EventType":
+            break;
+        case "Events":
+            eventManager.updateEvents();
+            break;
+        case "Members":
+            break;
+    }
 }
