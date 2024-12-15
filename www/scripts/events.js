@@ -45,7 +45,7 @@ const links = [
   // Header
   const thead = document.createElement('thead');
   const headerRow = document.createElement('tr');
-  ['ID', 'Tipo', 'Descritivo', 'data'].forEach(text => {
+  ['ID', 'Tipo', 'Descritivo', 'Data'].forEach(text => {
     const th = document.createElement('th');
     th.textContent = text;
     headerRow.appendChild(th);
@@ -62,17 +62,17 @@ const links = [
   { id: 2, tipo: 'BTT', desc: 'Teste BTT', data: '2024-11-30' },
   { id: 3, tipo: 'Estrada', desc: 'Teste Estrada Dezembro', data: '2024-12-01' },
   { id: 4, tipo: 'Pista', desc: 'Teste Pista Dezembro', data: '2024-12-15' },
-];
+  ];
 
-events.forEach(event => {
-    const row = document.createElement('tr');
-    Object.values(event).forEach(value => {
-        const td = document.createElement('td');
-        td.textContent = value;
-        row.appendChild(td);
-    });
-    tbody.appendChild(row);
-});
+// events.forEach(event => {
+//     const row = document.createElement('tr');
+//     Object.values(event).forEach(value => {
+//         const td = document.createElement('td');
+//         td.textContent = value;
+//         row.appendChild(td);
+//     });
+//     tbody.appendChild(row);
+// });
 
 table.appendChild(tbody);
 body.appendChild(table);
@@ -93,7 +93,7 @@ actionButtons.forEach(action => {
 
 body.appendChild(buttonContainer);
 
-//Rodapé
+// Rodapé
 const footer = document.createElement('footer');
 const footerLink = document.createElement('a');
 footerLink.className = 'about-link';

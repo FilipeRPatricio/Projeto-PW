@@ -76,8 +76,7 @@ footer {
     color: var(--root-background-color);
 }
 
-/*Tabela*/
-
+/*Tabela de Eventos*/
 .event-table {
     align-content:center;
     width: 70%;
@@ -86,7 +85,7 @@ footer {
     font-size: 1rem;
     text-align: left;
     border-radius: var(--root-border-radius);
-    overflow: hidden /*para o conteudo respeitar os cantos arredondados*/
+    overflow: hidden /*Para o conteudo respeitar os cantos arredondados*/
 }
 
 .event-table th {
@@ -106,9 +105,46 @@ footer {
 }
 
 .event-table tr:nth-child(odd) {
-    background-color: var(--root-background-color);}
+    background-color: var(--root-background-color);
+}
 
-/* botões da tabela */
+
+
+/*Tabela de Membros*/
+.member-table {
+    align-content:center;
+    width: auto;
+    border-collapse: collapse;
+    margin: auto;
+    font-size: 1rem;
+    text-align: left;
+    border-radius: var(--root-border-radius);
+    overflow: hidden /*Para o conteudo respeitar os cantos arredondados*/
+}
+
+.member-table th {
+    background-color: var(--root-primary-color);
+    color: var(--root-background-color);
+    padding: var(--root-half-space);
+    border: 1px solid var(--root-primary-color);
+}
+
+.member-table td {
+    padding: var(--root-half-space);
+    border: 1px solid #ffffff; /* Bordas brancas para linhas mais suaves */
+}
+
+.member-table tr:nth-child(even) {
+    background-color: rgb(77, 131, 188); /* Azul mais escuro */
+}
+
+.member-table tr:nth-child(odd) {
+    background-color: var(--root-background-color);
+}
+
+
+
+/*Botões de Criar, Editar, Apagar*/
 .button-container {
     display: flex;
     justify-content: center;
@@ -118,10 +154,12 @@ footer {
 .action-button {
     background-color: var(--root-primary-color);
     color: var(--root-background-color);
-    border: none;
+    border: 1px solid var(--root-background-color);;
     border-radius: var(--root-quarter-space);
     padding: var(--root-half-space) var(--root-space);
     margin: 0 var(--root-half-space);
+    margin-top: 10px;
+    margin-bottom: 25px;
     cursor: pointer;
     font-weight: bold;
     font-size: 1rem;

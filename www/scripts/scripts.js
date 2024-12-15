@@ -261,7 +261,7 @@ class EventManager {
 
     createEvent() {
 
-        updateEvents();
+        this.updateEvents();
     }
 
     editEvent() {
@@ -290,4 +290,5 @@ class MemberManager {
 
 window.onload = function () {
     const eventManager = new EventManager();
+    eventManager.updateEvents();
 }
