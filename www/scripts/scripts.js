@@ -1,4 +1,6 @@
 "use strict";
+const INITIAL_EVENT_ID = 1;
+EventManager.currentId = INITIAL_EVENT_ID;
 
 
 /* ENUM? */
@@ -82,9 +84,10 @@ class Events {
      */
     constructor(id, type, description, date) {
         this.#id = id;
-        if (type instanceof EventType) {
-            this.#type = type;
+        if (!(type instanceof EventType)) {
+            throw new Error("O tipo de evento deve ser do tipo EventType")
         }
+        this.#type = type;
         this.#description = description;
         this.#date = date;
     }
@@ -194,23 +197,16 @@ class Member {
  * @class Gestor de Tipos de Eventos (criar, editar, apagar).
  */
 class EventTypeManager {
-    /**
-     * @property {EventType[]} typeList - Lista de tipos de eventos
-     * @static
-     */
-    static typeList;
-
-    /**
-     * @property {number} currentId - Id atual dos tipos de eventos
-     * @static
-     */
-    static currentId;
+   
+      static typeList = [];
+      static currentId = 1;
+      static instance = null;
 
     constructor() {
         // Caso o id não tenha sido inicializado
-        if (EventTypeManager.currentId === void 0) {
-            EventTypeManager.currentId = 1;
-        }
+        if (EventTypeManager.instance) return EventTypeManager.instance;
+        
+        EventTypeManager.instance = this;
     }
 }
 
@@ -226,13 +222,19 @@ class EventManager {
      * @property {Events[]} eventList - Lista de eventos disponíveis
      * @static
      */
-    static eventList;
+    static eventList = [];
 
     /**
      * @property {number} currentId - Id atual dos eventos
      * @static
      */
-    static currentId;
+    static currentId = 1;           //alterei aqui para ele começar o id já em 1
+
+    /**
+     * @property {EventManager} instance                -A instancia unica do EventManager (Singleton)
+     * @static
+     */
+    static instance = null;
 
     /**
      * @property {Button} createButton - Botão para criar novos eventos
@@ -253,6 +255,13 @@ class EventManager {
      * @constructs EventManager
      */
     constructor() {
+
+        if(EventManager.instance){
+            return EventManager.instance; //Retorna instancia unica (singleton)
+        }
+        EventManager.instance = this;
+        
+
         // Caso o id não tenha sido inicializado
         if (EventManager.currentId === void 0) {
             EventManager.currentId = 1;
@@ -277,6 +286,12 @@ class EventManager {
         if (this.createButton) {
             this.setActions();
         }
+    }
+
+    getButtonById(id){                              //Em vez de verificarmos em varios sitios se os botões existem criei esta fç que verifica
+        const button = document.getElementById(id);
+        if(!button) console.warn('Botão com id "${id}" não encontrado');
+        return button;
     }
 
     /**
@@ -349,11 +364,12 @@ class EventManager {
 
         // Teste
         const type = new EventType(1, "BTT");
-        EventManager.eventList.push(new Events(EventManager.currentId, type, "Evento", "25-12-2024"));
+        const event = new Events(EventManager.currentId, type, "Evento", "15/12/2024");
+
+        EventManager.eventList.push(event);
+        EventManager.currentId++;
 
         // Adicionar evento à lista de eventos
-
-        EventManager.currentId++;
         this.updateEvents();
     }
 
@@ -372,23 +388,16 @@ class EventManager {
  * @class Gestor de Membros (criar, editar, apagar)
  */
 class MemberManager {
-    /**
-     * @property {Member[]} memberList - Lista dos membros disponíveis
-     * @static
-     */
-    static memberList;
-
-    /**
-     * @property {number} currentId - Id atual dos membros
-     * @static
-     */
-    static currentId;
+    
+    static memberList = [];
+    static currentId = 1;
+    static instance = null;
 
     constructor() {
         // Caso o id não tenha sido inicializado
-        if (MemberManager.currentId === void 0) {
-            MemberManager.currentId = 1;
-        }
+        if (MemberManager.instance) return MemberManager.instance;
+            
+        MemberManager.instance = this;
     }
 }
 
@@ -400,13 +409,15 @@ window.onload = function () {
     const eventManager = new EventManager();
     const memberManager = new MemberManager();
     
-    switch(document.body.id) {
-        case "EventType":
-            break;
-        case "Events":
-            eventManager.updateEvents();
-            break;
-        case "Members":
-            break;
-    }
+   const pageActions = {
+    "EventType": () => {},
+    "Events": () => eventManager.updateEvents(),
+    "Members": () => {},
+   };
+
+   const action = pageActions[document.body.id];
+   if(action) {
+    action();
+   }
 }
+ 
