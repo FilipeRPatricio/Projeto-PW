@@ -198,14 +198,19 @@ class Member {
  */
 class EventTypeManager {
    
-      static typeList = [];
-      static currentId = 1;
-      static instance = null;
+      static typeList;
+      static currentId;
+      static instance;
 
     constructor() {
         // Caso o id não tenha sido inicializado
         if (EventTypeManager.instance) return EventTypeManager.instance;
         
+        EventTypeManager.typeList = [];
+        EventTypeManager.currentId = 1;
+
+        this.createButtons();
+
         EventTypeManager.instance = this;
     }
 
@@ -224,10 +229,11 @@ class EventTypeManager {
      /**
      * Atualiza a tabela com os tipos de eventos.
      */
-    updateEventTypeTable(){
+    updateEventTypeTable() {
         const table = document.querySelector(".member-table tbody") || document.createElement("tbody");
-        //limpar tabela
-        table.innerHTML = "";
+
+        // Limpar tabela
+        table.textContent = "";
 
         EventTypeManager.typeList.forEach(type => {
             const row = document.createElement("tr");
@@ -242,47 +248,46 @@ class EventTypeManager {
             row.appendChild(descriptionCell);
             table.appendChild(row);
         });
+    }
 
-
-    //botão "Criar"
-    document.getElementById("type-create").addEventListener("click", () => {
-        console.log("clicked");
-        const modal = document.getElementById("createEventTypeModal");
-        modal.classList.remove("hidden");
+    createButtons() {
+        // Botão "Criar"
+        document.getElementById("type-create").addEventListener("click", () => {
+            console.log("clicked");
+            const modal = document.getElementById("createEventTypeModal");
+            modal.classList.remove("hidden");
     
-        // Preencher campo ID com o próximo ID disponível
-        document.getElementById("eventTypeId").value = EventTypeManager.currentId;
+            // Preencher campo ID com o próximo ID disponível
+            document.getElementById("eventTypeId").value = EventTypeManager.currentId;
         });
 
 
-    // Adicionar comportamento ao botão "Salvar"
-    document.getElementById("saveEventType").addEventListener("click", () => {
-    const descriptionInput = document.getElementById("eventTypeDescription");
-    const description = descriptionInput.value.trim();
+        // Adicionar comportamento ao botão "Salvar"
+        document.getElementById("saveEventType").addEventListener("click", () => {
+            const descriptionInput = document.getElementById("eventTypeDescription");
+            const description = descriptionInput.value.trim();
 
-    if (description) {
-        // Criar novo tipo de evento e atualizar tabela
-        eventTypeManager.createType(description);
-        eventTypeManager.updateEventTable();
+            if (description) {
+               // Criar novo tipo de evento e atualizar tabela
+               this.createType(description);
+               this.updateEventTypeTable();
 
-        // Fechar modal e limpar campo
-        document.getElementById("eventTypeModal").classList.add("hidden");
-        descriptionInput.value = "";
-    } else {
-        alert("Por favor, insira uma descrição.");
-    }
-    });
+                // Fechar modal e limpar campo
+                document.getElementById("createEventTypeModal").classList.add("hidden");
+                descriptionInput.value = "";
+            } else {
+                alert("Por favor, insira uma descrição.");
+            }
+        });
 
-    // Adicionar comportamento ao botão "Cancelar"
-    document.getElementById("cancelEventType").addEventListener("click", () => {
-    const modal = document.getElementById("eventTypeModal");
-    modal.classList.add("hidden");
+        // Adicionar comportamento ao botão "Cancelar"
+        document.getElementById("cancelEventType").addEventListener("click", () => {
+            const modal = document.getElementById("createEventTypeModal");
+            modal.classList.add("hidden");
 
-    // Limpar campo de descrição
-    document.getElementById("eventTypeDescription").value = "";
-});
-
-
+            // Limpar campo de descrição
+            document.getElementById("eventTypeDescription").value = "";
+        });
     }
 }
 
@@ -298,19 +303,19 @@ class EventManager {
      * @property {Events[]} eventList - Lista de eventos disponíveis
      * @static
      */
-    static eventList = [];
+    static eventList;
 
     /**
      * @property {number} currentId - Id atual dos eventos
      * @static
      */
-    static currentId = 1;           //alterei aqui para ele começar o id já em 1
+    static currentId;           //alterei aqui para ele começar o id já em 1
 
     /**
      * @property {EventManager} instance                -A instancia unica do EventManager (Singleton)
      * @static
      */
-    static instance = null;
+    static instance;
 
     /**
      * @property {Button} createButton - Botão para criar novos eventos
@@ -331,24 +336,16 @@ class EventManager {
      * @constructs EventManager
      */
     constructor() {
-
         if(EventManager.instance){
             return EventManager.instance; //Retorna instancia unica (singleton)
         }
-        EventManager.instance = this;
-        
 
-        // Caso o id não tenha sido inicializado
-        if (EventManager.currentId === void 0) {
-            EventManager.currentId = 1;
-        }
-
-        // Caso a lista de eventos não tenha sido inicializada
-        if (EventManager.eventList === void 0) {
-            EventManager.eventList = [];
-        }
+        EventManager.id = 1;
+        EventManager.eventList = [];
 
         this.initializeButtons();
+
+        EventManager.instance = this;
     }
 
     /**
@@ -486,7 +483,7 @@ window.onload = function () {
     const memberManager = new MemberManager();
     
    const pageActions = {
-    "EventType": () => {},
+    "EventType": () => eventTypeManager.updateEventTypeTable(),
     "Events": () => eventManager.updateEvents(),
     "Members": () => {},
    };
