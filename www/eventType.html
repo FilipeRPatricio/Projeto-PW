@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ESTSBike - Tipos de Eventos</title>
     <link rel="stylesheet" href="styles/styles.css"/>
-    <script src="scripts/scripts.js"></script>
+    <script src="../scripts.js"></script>
 </head>
 <body id="EventType">
     <!--Título-->
@@ -36,11 +36,31 @@
         <button id="type-delete" class="action-button">Apagar</button>
     </div>
 
+
+    <!--Display ao carregar em eventType-->
+    <div id="createEventTypeModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h2>Criar um novo tipo de evento</h2>
+            <form id="createEventTypeForm">
+                <label for="eventTypeId">ID:</label>
+                <input type="number" id="eventTypeId" name="eventTypeId" readonly><br><br>
+                <label for="eventTypeDescription">Descritivo:</label>
+                <input type="text" id="eventTypeDescription" name="eventTypeDescription" required><br><br>
+                <div class="modal-buttons">
+                    <button type="button" id="saveEventType">Criar</button>
+                    <button type="button" id="cancelEventType">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    
+
 </body>
 
 <!--Rodapé-->
 <footer>
     <a class="about-link" href="about.html">About &copy; Tecnologia Setúbal &bull; Programação Web</a>
 </footer>
-
 </html>
