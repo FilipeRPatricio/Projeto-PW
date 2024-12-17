@@ -1,7 +1,7 @@
 "use strict";
 const INITIAL_EVENT_ID = 1;
-EventManager.currentId = INITIAL_EVENT_ID;
 
+//EventManager.currentId = INITIAL_EVENT_ID;    ta a dar mal pq ele aqui ainda n foi definido 
 
 /* ENUM? */
 /**
@@ -207,6 +207,82 @@ class EventTypeManager {
         if (EventTypeManager.instance) return EventTypeManager.instance;
         
         EventTypeManager.instance = this;
+    }
+
+      /**
+     * Cria um novo tipo de evento e adiciona à lista.
+     * @param {string} description - Descrição do tipo de evento.
+     */
+    createType(description){
+        const newType = new EventType(EventTypeManager.currentId, description);
+        EventTypeManager.typeList.push(newType);
+        EventTypeManager.currentId++;
+        return newType; 
+    }
+
+
+     /**
+     * Atualiza a tabela com os tipos de eventos.
+     */
+    updateEventTypeTable(){
+        const table = document.querySelector(".member-table tbody") || document.createElement("tbody");
+        //limpar tabela
+        table.innerHTML = "";
+
+        EventTypeManager.typeList.forEach(type => {
+            const row = document.createElement("tr");
+
+            const idCell = document.createElement("td");
+            idCell.textContent = type.id;
+
+            const descriptionCell = document.createElement("td");
+            idCell.textContent = type.description;
+
+            row.appendChild(idCell);
+            row.appendChild(descriptionCell);
+            table.appendChild(row);
+        });
+
+
+    //botão "Criar"
+    document.getElementById("type-create").addEventListener("click", () => {
+        console.log("clicked");
+        const modal = document.getElementById("createEventTypeModal");
+        modal.classList.remove("hidden");
+    
+        // Preencher campo ID com o próximo ID disponível
+        document.getElementById("eventTypeId").value = EventTypeManager.currentId;
+        });
+
+
+    // Adicionar comportamento ao botão "Salvar"
+    document.getElementById("saveEventType").addEventListener("click", () => {
+    const descriptionInput = document.getElementById("eventTypeDescription");
+    const description = descriptionInput.value.trim();
+
+    if (description) {
+        // Criar novo tipo de evento e atualizar tabela
+        eventTypeManager.createType(description);
+        eventTypeManager.updateEventTable();
+
+        // Fechar modal e limpar campo
+        document.getElementById("eventTypeModal").classList.add("hidden");
+        descriptionInput.value = "";
+    } else {
+        alert("Por favor, insira uma descrição.");
+    }
+    });
+
+    // Adicionar comportamento ao botão "Cancelar"
+    document.getElementById("cancelEventType").addEventListener("click", () => {
+    const modal = document.getElementById("eventTypeModal");
+    modal.classList.add("hidden");
+
+    // Limpar campo de descrição
+    document.getElementById("eventTypeDescription").value = "";
+});
+
+
     }
 }
 
@@ -419,5 +495,5 @@ window.onload = function () {
    if(action) {
     action();
    }
-}
+} 
  
