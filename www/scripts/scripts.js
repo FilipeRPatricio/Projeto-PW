@@ -200,18 +200,12 @@ class EventTypeManager {
    
       static typeList;
       static currentId;
-      static instance;
 
     constructor() {
-        // Caso o id não tenha sido inicializado
-        if (EventTypeManager.instance) return EventTypeManager.instance;
-        
         EventTypeManager.typeList = [];
         EventTypeManager.currentId = 1;
 
         this.createButtons();
-
-        EventTypeManager.instance = this;
     }
 
       /**
@@ -230,30 +224,47 @@ class EventTypeManager {
      * Atualiza a tabela com os tipos de eventos.
      */
     updateEventTypeTable() {
-        const table = document.querySelector(".member-table tbody") || document.createElement("tbody");
+        const table = document.getElementById("member-table");
+        console.log(table);
+
+        /**  */
+        table.removeChild(table.getElementsByTagName("tbody")[0]);
+
+        const tbody = document.createElement("tbody");
+        table.appendChild(tbody);
 
         // Limpar tabela
-        table.textContent = "";
+        tbody.replaceChildren();
 
         EventTypeManager.typeList.forEach(type => {
-            const row = document.createElement("tr");
+            const row = this.#addTableRow(type);
 
-            const idCell = document.createElement("td");
-            idCell.textContent = type.id;
-
-            const descriptionCell = document.createElement("td");
-            idCell.textContent = type.description;
-
-            row.appendChild(idCell);
-            row.appendChild(descriptionCell);
-            table.appendChild(row);
+            tbody.appendChild(row);
         });
+    }
+
+    #addTableRow(type) {
+        let result = document.createElement('tr');
+
+        // Array para iterar sobre cada parâmetro
+        const typeValues = [
+            type.id,
+            type.description
+        ]
+
+        // Adicionar uma coluna na tabela para cada parâmetro no evento
+        typeValues.forEach(parameter => {
+            const td = document.createElement('td');
+            td.textContent = parameter;
+            result.appendChild(td);
+        });
+
+        return result;
     }
 
     createButtons() {
         // Botão "Criar"
         document.getElementById("type-create").addEventListener("click", () => {
-            console.log("clicked");
             const modal = document.getElementById("createEventTypeModal");
             modal.classList.remove("hidden");
     
@@ -268,13 +279,16 @@ class EventTypeManager {
             const description = descriptionInput.value.trim();
 
             if (description) {
+                console.log(description);
+
                // Criar novo tipo de evento e atualizar tabela
                this.createType(description);
-               this.updateEventTypeTable();
 
                 // Fechar modal e limpar campo
                 document.getElementById("createEventTypeModal").classList.add("hidden");
                 descriptionInput.value = "";
+
+               this.updateEventTypeTable();
             } else {
                 alert("Por favor, insira uma descrição.");
             }
@@ -464,7 +478,6 @@ class MemberManager {
     
     static memberList = [];
     static currentId = 1;
-    static instance = null;
 
     constructor() {
         // Caso o id não tenha sido inicializado
@@ -474,7 +487,7 @@ class MemberManager {
     }
 }
 
-
+let memberManagerInstance;
 
 window.onload = function () {
     // TODO: Change to singleton instances
@@ -493,4 +506,8 @@ window.onload = function () {
     action();
    }
 } 
- 
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("Loaded!");
+});

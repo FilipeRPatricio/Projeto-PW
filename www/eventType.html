@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ESTSBike - Tipos de Eventos</title>
     <link rel="stylesheet" href="styles/styles.css"/>
-    <script src="scripts/scripts.js"></script>
+    <script src="scripts\scripts.js"></script>
 </head>
 <body id="EventType">
     <!--Título-->
@@ -20,13 +20,17 @@
 
     <!--Tabela de Tipos de Eventos-->
     <h1 class="page-title">Tipos de Eventos</h1>
-    <table class="member-table">                        <!-- TODO: Change class -->
+
+    <table id ="member-table" class="member-table">                        <!-- TODO: Change class -->
         <thead>
             <tr>
                 <th>Id</th>
                 <th>Descritivo</th>
             </tr>
         </thead>
+        <tbody>
+
+        </tbody>
     </table>
 
     <!--Botões de Ação-->
@@ -42,11 +46,14 @@
         <div class="modal-content">
             <span class="close" id="closeModal">&times;</span>
             <h2>Criar um novo tipo de evento</h2>
+
             <form id="createEventTypeForm">
                 <label for="eventTypeId">ID:</label>
                 <input type="number" id="eventTypeId" name="eventTypeId" readonly><br><br>
+
                 <label for="eventTypeDescription">Descritivo:</label>
                 <input type="text" id="eventTypeDescription" name="eventTypeDescription" required><br><br>
+
                 <div class="modal-buttons">
                     <button type="button" id="saveEventType">Criar</button>
                     <button type="button" id="cancelEventType">Cancelar</button>
