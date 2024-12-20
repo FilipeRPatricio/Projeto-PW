@@ -1,9 +1,7 @@
 "use strict";
-const INITIAL_EVENT_ID = 1;
 
-//EventManager.currentId = INITIAL_EVENT_ID;    ta a dar mal pq ele aqui ainda n foi definido 
 
-/* ENUM? */
+
 /**
  * Classe EventType
  * 
@@ -296,64 +294,85 @@ class EventTypeManager {
 
     createButtons() {
         // Botão "Criar"
-        document.getElementById("type-create").addEventListener("click", () => {
-            const modal = document.getElementById("createEventTypeModal");
-            modal.classList.remove("hidden");
-    
-            // Preencher campo ID com o próximo ID disponível
-            document.getElementById("eventTypeId").value = EventTypeManager.currentId;
-        });
+        const createButton = document.getElementById("type-create");
+
+        if (createButton) {
+            createButton.addEventListener("click", () => {
+                const modal = document.getElementById("createEventTypeModal");
+                modal.classList.remove("hidden");
+        
+                // Preencher campo ID com o próximo ID disponível
+                document.getElementById("eventTypeId").value = EventTypeManager.currentId;
+            });
+        }
 
 
-        // Adicionar comportamento ao botão "Criar"
-        document.getElementById("saveEventType").addEventListener("click", () => {
-            const descriptionInput = document.getElementById("eventTypeDescription");
-            const description = descriptionInput.value.trim();
+        // Adicionar comportamento ao botão "Salvar"
+        const saveButton = document.getElementById("saveEventType");
 
-            if (description) {
-                console.log(description);
+        if (saveButton) {
+            saveButton.addEventListener("click", () => {
+                const descriptionInput = document.getElementById("eventTypeDescription");
+                const description = descriptionInput.value.trim();
 
-               // Criar novo tipo de evento e atualizar tabela
-               this.createType(description);
+                if (description) {
+                    console.log(description);
 
-                // Fechar modal e limpar campo
-                document.getElementById("createEventTypeModal").classList.add("hidden");
-                descriptionInput.value = "";
+                // Criar novo tipo de evento e atualizar tabela
+                this.createType(description);
 
-               this.updateEventTypeTable();
-            } else {
-                alert("Por favor, insira uma descrição.");
-            }
-        });
+                    // Fechar modal e limpar campo
+                    document.getElementById("createEventTypeModal").classList.add("hidden");
+                    descriptionInput.value = "";
+
+                this.updateEventTypeTable();
+                } else {
+                    alert("Por favor, insira uma descrição.");
+                }
+            });
+        }
 
         // Adicionar comportamento ao botão "Cancelar"
-        document.getElementById("cancelEventType").addEventListener("click", () => {
-            const modal = document.getElementById("createEventTypeModal");
-            modal.classList.add("hidden");
+        const cancelButton = document.getElementById("cancelEventType");
 
-            // Limpar campo de descrição
-            document.getElementById("eventTypeDescription").value = "";
-        });
+        if (cancelButton) {
+            cancelButton.addEventListener("click", () => {
+                const modal = document.getElementById("createEventTypeModal");
+                modal.classList.add("hidden");
+
+                // Limpar campo de descrição
+                document.getElementById("eventTypeDescription").value = "";
+            });
+        }
 
 
         // Botão "Editar"
+        const editButton = document.getElementById("type-edit");
 
-        document.getElementById("type-edit").addEventListener("click", () => {
-            if(this.selectedID !== undefined) {
+        if (editButton) {
+            editButton.addEventListener("click", () => {
+                if(this.selectedID === void 0) {
+                    alert("Por favor, selecione um tipo de evento antes de editar.");
+                }
                 const selectedType = EventTypeManager.typeList.find(type => type.id ===  this.selectedID);
-                if(selectedType) {
-                    const modal = document.getElementById("createEventTypeModal");
-                    modal.classList.remove("hidden");
+                if(!selectedType) {
+                    alert("ERRO: Tipo de evento selecionado não encontrado.");
+                }
+                const modal = document.getElementById("createEventTypeModal");
+                modal.classList.remove("hidden");
 
-                    //Preenche o modal com os valores já existentes
-                    document.getElementById("eventTypeId").value = selectedType.id;
-                    document.getElementById("eventTypeDescription").value = selectedType.description;
+                //Preenche o modal com os valores já existentes
+                document.getElementById("eventTypeId").value = selectedType.id;
+                document.getElementById("eventTypeDescription").value = selectedType.description;
 
-                    // Ajusta o comportamento do botão de salvar para edição
-                    document.getElementById("saveEventType").onclick = () => {
+                // Ajusta o comportamento do botão de salvar para edição
+                document.getElementById("saveEventType").onclick = () => {
                     const newDescription = document.getElementById("eventTypeDescription").value.trim();
 
-                    if (newDescription.length) {
+                    if (!newDescription.length) {
+                        alert("Por favor, insira uma descrição válida.");
+                    }
+
                     // Atualiza a descrição do tipo de evento selecionado
                     eventManager.editType(this.selectedID, newDescription);
 
@@ -365,34 +384,27 @@ class EventTypeManager {
 
                     // Limpa o campo de descrição
                     document.getElementById("eventTypeDescription").value = "";
-                } else {
-                    alert("Por favor, insira uma descrição válida.");
-                }
-            };
-        } else {
-            alert("ERRO: Tipo de evento selecionado não encontrado.");
+                };
+            });
         }
-    } else {
-        alert("Por favor, selecione um tipo de evento antes de editar.");
-    }
-});
-
+        
 
         // Botão "Apagar"
+        const deleteButton = document.getElementById("type-delete");
 
-        document.getElementById("type-delete").addEventListener("click", () => {
-            if(this.selectedID !== undefined){
-                console.log("ID selecionado antes da confirmação: " , this.selectedID);
-                const confirmed = confirm("Tem a certeza que deseja apagar este tipo de evento?");
-                if(confirmed){
-                    console.log("Lista antes da remoção")
-                    EventTypeManager.typeList = EventTypeManager.typeList.filter(type => type.id !== this.selectedID);
-                    console.log("Lista após remoção: ", EventTypeManager.typeList);
-                    this.selectedID = undefined; //Limpa
-                    this.updateEventTypeTable();
-                }
-            } else {
+        deleteButton.addEventListener("click", () => {
+            if(this.selectedID === void 0) {
                 alert("Tem que selecionar um tipo de evento antes de apagar.");
+            }
+            console.log("ID selecionado antes da confirmação: " , this.selectedID);
+            const confirmed = confirm("Tem a certeza que deseja apagar este tipo de evento?");
+            
+            if(confirmed){
+                console.log("Lista antes da remoção")
+                EventTypeManager.typeList = EventTypeManager.typeList.filter(type => type.id !== this.selectedID);
+                console.log("Lista após remoção: ", EventTypeManager.typeList);
+                this.selectedID = void 0; //Limpa
+                this.updateEventTypeTable();
             }
         });
 
@@ -606,14 +618,10 @@ class MemberManager {
     static currentId = 1;
 
     constructor() {
-        // Caso o id não tenha sido inicializado
-        if (MemberManager.instance) return MemberManager.instance;
-            
-        MemberManager.instance = this;
     }
 }
 
-let memberManagerInstance;
+
 
 window.onload = function () {
     // TODO: Change to singleton instances
@@ -631,9 +639,4 @@ window.onload = function () {
    if(action) {
     action();
    }
-} 
-
-
-document.addEventListener("DOMContentLoaded", () => {
-    console.log("Loaded!");
-});
+}
