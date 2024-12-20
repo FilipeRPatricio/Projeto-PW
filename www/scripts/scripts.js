@@ -220,6 +220,29 @@ class EventTypeManager {
     }
 
 
+       
+    // Atualiza a descrição de um tipo de evento na tabela                      -----Trabalhar aqui 
+    changeDescription(newDescription) {
+        const table = document.getElementById("member-table");
+        const tbody = table.querySelector("tbody");
+
+        if (tbody) {
+            Array.from(tbody.rows).forEach(row => {
+                const rowId = parseInt(row.getAttribute("data-id"), 10); // ID na linha
+                if (rowId === this.selectedID) {
+                    const descriptionCell = row.querySelector(".description-cell");
+                    if (descriptionCell) {
+                        descriptionCell.textContent = newDescription;
+                    }
+                }
+            });
+        }
+    }
+
+
+
+
+
      /**
      * Atualiza a tabela com os tipos de eventos.
      */
@@ -327,11 +350,11 @@ class EventTypeManager {
                     document.getElementById("eventTypeDescription").value = selectedType.description;
 
                     // Ajusta o comportamento do botão de salvar para edição
-                document.getElementById("saveEventType").onclick = () => {
-                const newDescription = document.getElementById("eventTypeDescription").value.trim();
-                if (newDescription) {
+                    document.getElementById("saveEventType").onclick = () => {
+                    const newDescription = document.getElementById("eventTypeDescription").value.trim();
+
+                    if (newDescription.length) {
                     // Atualiza a descrição do tipo de evento selecionado
-                    const eventManager = new EventManager();
                     eventManager.editType(this.selectedID, newDescription);
 
                     // Atualiza a tabela
