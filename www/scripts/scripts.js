@@ -204,7 +204,7 @@ class EventTypeManager {
     constructor() {
         EventTypeManager.typeList = [];
         EventTypeManager.currentId = 1;
-        this.selectedID = undefined;        //tipo de evento selecionado
+        this.selectedID = undefined;        //tipo de evento selecionado inicialmente undef
         this.createButtons();
     }
 
@@ -312,23 +312,70 @@ class EventTypeManager {
             document.getElementById("eventTypeDescription").value = "";
         });
 
+
+        // Botão "Editar"
+
+        document.getElementById("type-edit").addEventListener("click", () => {
+            if(this.selectedID !== undefined) {
+                const selectedType = EventTypeManager.typeList.find(type => type.id ===  this.selectedID);
+                if(selectedType) {
+                    const modal = document.getElementById("createEventTypeModal");
+                    modal.classList.remove("hidden");
+
+                    //Preenche o modal com os valores já existentes
+                    document.getElementById("eventTypeId").value = selectedType.id;
+                    document.getElementById("eventTypeDescription").value = selectedType.description;
+
+                    // Ajusta o comportamento do botão de salvar para edição
+                document.getElementById("saveEventType").onclick = () => {
+                const newDescription = document.getElementById("eventTypeDescription").value.trim();
+                if (newDescription) {
+                    // Atualiza a descrição do tipo de evento selecionado
+                    const eventManager = new EventManager();
+                    eventManager.editType(this.selectedID, newDescription);
+
+                    // Atualiza a tabela
+                    this.updateEventTypeTable();
+
+                    // Fecha o modal
+                    modal.classList.add("hidden");
+
+                    // Limpa o campo de descrição
+                    document.getElementById("eventTypeDescription").value = "";
+                } else {
+                    alert("Por favor, insira uma descrição válida.");
+                }
+            };
+        } else {
+            alert("ERRO: Tipo de evento selecionado não encontrado.");
+        }
+    } else {
+        alert("Por favor, selecione um tipo de evento antes de editar.");
+    }
+});
+
+
         // Botão "Apagar"
 
         document.getElementById("type-delete").addEventListener("click", () => {
             if(this.selectedID !== undefined){
+                console.log("ID selecionado antes da confirmação: " , this.selectedID);
                 const confirmed = confirm("Tem a certeza que deseja apagar este tipo de evento?");
                 if(confirmed){
-                    this.deleteEventTypeButton(this.selectedID);
+                    console.log("Lista antes da remoção")
+                    EventTypeManager.typeList = EventTypeManager.typeList.filter(type => type.id !== this.selectedID);
+                    console.log("Lista após remoção: ", EventTypeManager.typeList);
                     this.selectedID = undefined; //Limpa
+                    this.updateEventTypeTable();
                 }
             } else {
                 alert("Tem que selecionar um tipo de evento antes de apagar.");
             }
         });
+
     }
+
 }
-
-
 
 /**
  * Classe EventManager
@@ -354,27 +401,54 @@ class EventManager {
      */
     static instance;
 
+
+
+//--------------------------------------------criar-----------------------------------------------------------------------
     /**
      * @property {Button} createButton - Botão para criar novos eventos
      */
-    createButton;
-
+        /**
+    * cria um novo tipo de evento
+    * @param {string} description
+    */
+    createType(description) {
+        const newType = new EventType(EventTypeManager.currentId, description);
+        EventTypeManager.typeList.push(newType);
+        EventTypeManager.currentId++;
+        return newType;
+    }
+//-----------------------------------------editar-------------------------------------------------------------------------
     /**
      * @property {Button} editButton - Botão para editar eventos
+     * @param {number} id
+     * @param {string} newDescription
      */
-    editButton;
-
+    editType(id, newDescription) {
+        const typeIndex = EventTypeManager.typeList.findIndex(type => type.id === id);
+        if(typeIndex !== -1) {
+            EventTypeManager.typeList[typeIndex].description = newDescription;
+        } else {
+            console.error("ERRO: tipo de evento não encontrado.");
+        }
+    }
+//------------------------------------------apagar----------------------------------------------------------------------------------
     /**
      * @property {Button} deleteButton - Botão para apagar eventos
      * Remove um tipo de evento da lista com base no ID
      */
     deleteEventTypeButton(id) {
-        //filtra a lista para remover o evento com o ID corresspondente
-         EventTypeManager.typeList = EventTypeManager.typeList.filter(type => type.id !== id);
-
+        // Verifica se typeList está definido
+        if (!EventTypeManager.typeList) {
+            console.error("typeList não foi inicializado.");
+            return;
+        }
+        // Filtra a lista para remover o evento com o ID correspondente
+        EventTypeManager.typeList = EventTypeManager.typeList.filter(type => type.id !== id);
+    
+        console.log("Lista após a remoção:", EventTypeManager.typeList);
         this.updateEventTypeTable();
     }
-
+//-------------------------------------------construtor-----------------------------------------------------------------------
     /**
      * @constructs EventManager
      */
