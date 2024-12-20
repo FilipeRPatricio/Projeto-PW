@@ -204,7 +204,7 @@ class EventTypeManager {
     constructor() {
         EventTypeManager.typeList = [];
         EventTypeManager.currentId = 1;
-
+        this.selectedID = undefined;        //tipo de evento selecionado
         this.createButtons();
     }
 
@@ -227,17 +227,26 @@ class EventTypeManager {
         const table = document.getElementById("member-table");
         console.log(table);
 
-        /**  */
+        /*remove o tbody antigo e cria um novo*/
         table.removeChild(table.getElementsByTagName("tbody")[0]);
-
         const tbody = document.createElement("tbody");
         table.appendChild(tbody);
 
-        // Limpar tabela
-        tbody.replaceChildren();
+        
 
         EventTypeManager.typeList.forEach(type => {
             const row = this.#addTableRow(type);
+
+            //Adiciona evento de clique para selecionar uma linha
+
+            row.addEventListener("click", () =>{
+
+                document.querySelectorAll("#member-table tbody tr").forEach(r => r.classList.remove("selected"));
+                row.classList.add("selected");
+
+                // atualiza id selecionado
+                this.selectedID = type.id;
+        })
 
             tbody.appendChild(row);
         });
@@ -273,7 +282,7 @@ class EventTypeManager {
         });
 
 
-        // Adicionar comportamento ao botão "Salvar"
+        // Adicionar comportamento ao botão "Criar"
         document.getElementById("saveEventType").addEventListener("click", () => {
             const descriptionInput = document.getElementById("eventTypeDescription");
             const description = descriptionInput.value.trim();
@@ -301,6 +310,20 @@ class EventTypeManager {
 
             // Limpar campo de descrição
             document.getElementById("eventTypeDescription").value = "";
+        });
+
+        // Botão "Apagar"
+
+        document.getElementById("type-delete").addEventListener("click", () => {
+            if(this.selectedID !== undefined){
+                const confirmed = confirm("Tem a certeza que deseja apagar este tipo de evento?");
+                if(confirmed){
+                    this.deleteEventTypeButton(this.selectedID);
+                    this.selectedID = undefined; //Limpa
+                }
+            } else {
+                alert("Tem que selecionar um tipo de evento antes de apagar.");
+            }
         });
     }
 }
@@ -343,8 +366,14 @@ class EventManager {
 
     /**
      * @property {Button} deleteButton - Botão para apagar eventos
+     * Remove um tipo de evento da lista com base no ID
      */
-    deleteButton;
+    deleteEventTypeButton(id) {
+        //filtra a lista para remover o evento com o ID corresspondente
+         EventTypeManager.typeList = EventTypeManager.typeList.filter(type => type.id !== id);
+
+        this.updateEventTypeTable();
+    }
 
     /**
      * @constructs EventManager

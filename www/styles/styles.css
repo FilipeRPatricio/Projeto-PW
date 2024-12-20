@@ -190,7 +190,7 @@ footer {
 }
 
 .modal-content {
-    background-color: #fff;
+    background-color: #ccddff;
     padding: 2rem;
     border-radius: var(--root-border-radius);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
@@ -202,4 +202,10 @@ footer {
     display: flex;
     justify-content: space-between;
     margin-top: var(--root-space);
+}
+
+/*Estilo para cada linha selecionada*/
+tr.selected {
+    background-color: rgb(169, 247, 44);
+    font-weight: bold;
 }
