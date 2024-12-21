@@ -5,9 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ESTSBike - Eventos</title>
     <link rel="stylesheet" href="styles/styles.css"/>
+    <script defer src="scripts\scripts.js"></script>
 </head>
 <body id="Events">
     <script src="scripts\events.js"></script>
-    <script src="scripts\scripts.js"></script>
-</body>
+
+    <!--Modal de Criação de Eventos-->
+    <div id="event-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="modal-title" class = "h2">Criar Evento</h2>
+
+            <form id="event-form">
+                <!-- Id -->
+                <label for="event-id">ID:</label>
+                <input style="font-size: 20px; border: none; background: none; padding:0; margin:0;" type="number" id="event-id" readonly />
+                <br />
+                <!-- Tipo de Evento -->
+                <label for="event-type">Tipo: </label>
+                <input type="text" id="event-type" required />
+                <br />
+                <!-- Descrição -->
+                <label for="event-description">Descritivo: </label>
+                <input type="text" id="event-description" required />
+                <br />
+                <!-- Data -->
+                <label for="event-date">Data: </label>
+                <input type="date" id="event-date" required />
+
+                <div class="modal-actions">
+                    <button type="button" id="save-event" class="action-button">Gravar</button>
+                    <button type="button" id="cancel-event" class="action-button">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </html>
