@@ -721,6 +721,8 @@ class EventManager {
 
 
 /**
+ * Classe MemberManager
+ * 
  * @class Gestor de Membros (criar, editar, apagar)
  */
 class MemberManager {
