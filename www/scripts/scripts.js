@@ -181,19 +181,37 @@ class Events {
  * @class Gestor de Tipos de Eventos (criar, editar, apagar).
  */
 class EventTypeManager {
-   
-      static typeList = [];
-      static currentId = 1;
 
+    /**
+     * @property {EventType[]} typeList - Lista de tipos de eventos
+     * @static
+     */
+    static typeList = [];
+
+    /**
+     * @property {number} currentId - Id atual dos tipos de eventos
+     * @static
+     */
+    static currentId = 1;
+
+    /**
+     * @property {number} selectedId - Id selecionado na tabela
+     */
+    selectedID;
+
+    /**
+     * @constructs EventTypeManager
+     */
     constructor() {
         this.selectedID = null;        //tipo de evento selecionado inicialmente
         this.createButtons();
     }
 
-      /**
-     * Cria um novo tipo de evento e adiciona à lista.
-     * @param {string} description - Descrição do tipo de evento.
-     */
+    /**
+    * Cria um novo tipo de evento e adiciona-o à lista.
+    * 
+    * @param {string} description - Descrição do tipo de evento.
+    */
     createType(description){
         const newType = new EventType(EventTypeManager.currentId, description);
         EventTypeManager.typeList.push(newType);
@@ -201,23 +219,23 @@ class EventTypeManager {
         return newType; 
     }
 
-    // Atualiza a descrição de um tipo de evento na tabela                      -----Trabalhar aqui 
-    changeDescription(newDescription) {
-        const table = document.getElementById("member-table");
-        const tbody = table.getElementsByTagName("tbody");
+    // Atualiza a descrição de um tipo de evento na tabela
+    // changeDescription(newDescription) {
+    //     const table = document.getElementById("member-table");
+    //     const tbody = table.getElementsByTagName("tbody");
 
-        if (tbody) {
-            Array.from(tbody.rows).forEach(row => {
-                const rowId = parseInt(row.getAttribute("data-id"), 10); // ID na linha
-                if (rowId === this.selectedID) {
-                    const descriptionCell = row.querySelector(".description-cell");
-                    if (descriptionCell) {
-                        descriptionCell.textContent = newDescription;
-                    }
-                }
-            });
-        }
-    }
+    //     if (tbody) {
+    //         Array.from(tbody.rows).forEach(row => {
+    //             const rowId = parseInt(row.getAttribute("data-id"), 10); // ID na linha
+    //             if (rowId === this.selectedID) {
+    //                 const descriptionCell = row.querySelector(".description-cell");
+    //                 if (descriptionCell) {
+    //                     descriptionCell.textContent = newDescription;
+    //                 }
+    //             }
+    //         });
+    //     }
+    // }
 
      /**
      * Atualiza a tabela com os tipos de eventos.
@@ -252,6 +270,12 @@ class EventTypeManager {
         });
     }
 
+    /**
+     * Cria e retorna uma linha de tabela com os valores de um tipo de evento.
+     * 
+     * @param {EventType} type - o tipo de evento para a nova linha da tabela
+     * @returns uma nova linha para a tabela de tipos de eventos
+     */
     #addTableRow(type) {
         let result = document.createElement('tr');
 
@@ -272,8 +296,10 @@ class EventTypeManager {
     }
     
     /**
-     * @param {number} id
-     * @param {string} newDescription
+     * 
+     * 
+     * @param {number} id - 
+     * @param {string} newDescription - 
      */
     editType(id, newDescription) {
         const type = EventTypeManager.typeList.find(type => type.id === id);
@@ -282,13 +308,31 @@ class EventTypeManager {
         }
     }
 
-    // TODO: Refactor createButtons method
     /**
-     * 
-     * @returns 
+     * Cria as ações do botões de gerenciamento de tipos de eventos.
+     * (Criar, Editar, Apagar, Salvar e Cancelar)
      */
     createButtons() {
         // Botão "Criar"
+        this.#createTypeButton();
+
+        // Botão "Salvar"
+        this.#saveTypeButton();
+
+        // Botão "Cancelar"
+        this.#cancelTypeButton();
+
+        // Botão "Editar"
+        this.#editTypeButton();
+        
+        // Botão "Apagar"
+        this.#deleteTypeButton();
+    }
+
+    /**
+     * Cria a ação do botão para criar um novo tipo de evento.
+     */
+    #createTypeButton() {
         const createButton = document.getElementById("type-create");
 
         if (createButton) {
@@ -300,9 +344,12 @@ class EventTypeManager {
                 document.getElementById("eventTypeId").value = EventTypeManager.currentId;
             });
         }
+    }
 
-
-        // Adicionar comportamento ao botão "Salvar"
+    /**
+     * Cria a ação do botão para salvar a criação de um novo tipo de evento.
+     */
+    #saveTypeButton() {
         const saveButton = document.getElementById("saveEventType");
 
         if (saveButton) {
@@ -332,8 +379,12 @@ class EventTypeManager {
                 
             });
         }
+    }
 
-        // Adicionar comportamento ao botão "Cancelar"
+    /**
+     * Cria a ação do botão para cancelar a criação de um novo tipo de evento.
+     */
+    #cancelTypeButton() {
         const cancelButton = document.getElementById("cancelEventType");
 
         if (cancelButton) {
@@ -345,8 +396,12 @@ class EventTypeManager {
                 document.getElementById("eventTypeDescription").value = "";
             });
         }
+    }
 
-        // Botão "Editar"
+    /**
+     * Cria a ação do botão para editar um tipo de evento.
+     */
+    #editTypeButton() {
         const editButton = document.getElementById("type-edit");
 
         if (editButton) {
@@ -358,13 +413,14 @@ class EventTypeManager {
 
                 const selectedType = EventTypeManager.typeList.find(type => type.id ===  this.selectedID);
                 if(!selectedType) {
-                    alert("ERRO: Tipo de evento selecionado não encontrado.");
+                    alert("Erro, tipo de evento selecionado não encontrado.");
                     return;
                 }
+
                 const modal = document.getElementById("createEventTypeModal");
                 modal.classList.remove("hidden");
 
-                //Preenche o modal com os valores já existentes
+                // Preenche o modal com os valores já existentes
                 document.getElementById("eventTypeId").value = selectedType.id;
                 document.getElementById("eventTypeDescription").value = selectedType.description;
 
@@ -374,48 +430,38 @@ class EventTypeManager {
                     if (!newDescription) {
                         return;
                     }
-
                     newDescription = newDescription.value;
-
-                    // Atualiza a descrição do tipo de evento selecionado
-                    // this.editType(this.selectedID, newDescription);
-
-                    // Atualiza a tabela
-                    //this.updateEventTypeTable();
 
                     // Fecha o modal
                     modal.classList.add("hidden");
-
-                    // Limpa o campo de descrição
-                    //document.getElementById("eventTypeDescription").value = "";
                 };
             });
         }
-        
+    }
 
-        // Botão "Apagar"
+    /**
+     * Cria a ação do botão para apagar um tipo de evento.
+     */
+    #deleteTypeButton() {
         const deleteButton = document.getElementById("type-delete");
-        if (!deleteButton) {
-            return;
+
+        if (deleteButton) {
+            deleteButton.addEventListener("click", () => {
+
+                if(!this.selectedID) {
+                    alert("Tem que selecionar um tipo de evento antes de apagar.");
+                    return;
+                }
+
+                const confirmed = confirm("Tem a certeza que deseja apagar este tipo de evento?");
+                
+                if(confirmed){
+                    EventTypeManager.typeList = EventTypeManager.typeList.filter(type => type.id !== this.selectedID);
+                    this.selectedID = null;
+                    this.updateEventTypeTable();
+                }
+            });
         }
-
-        deleteButton.addEventListener("click", () => {
-            if(this.selectedID === void 0) {
-                alert("Tem que selecionar um tipo de evento antes de apagar.");
-                return;
-            }
-            console.log("ID selecionado antes da confirmação: " , this.selectedID);
-            const confirmed = confirm("Tem a certeza que deseja apagar este tipo de evento?");
-            
-            if(confirmed){
-                console.log("Lista antes da remoção: ", EventTypeManager.typeList);
-                EventTypeManager.typeList = EventTypeManager.typeList.filter(type => type.id !== this.selectedID);
-                console.log("Lista após remoção: ", EventTypeManager.typeList);
-                this.selectedID = void 0; //Limpa
-                this.updateEventTypeTable();
-            }
-        });
-
     }
 }
 
