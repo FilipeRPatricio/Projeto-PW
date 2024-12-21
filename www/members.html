@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ESTSBike - Membros</title>
     <link rel="stylesheet" href="styles/styles.css"/>
-    <script src="scripts/scripts.js"></script>
+    <script src="scripts/scripts.js" defer></script>
 </head>
 <body id="Members">
     <!--Título-->
@@ -20,13 +20,17 @@
 
     <!--Tabela de Membros-->
     <h1 class="page-title">Membros</h1>
-    <table class="member-table">
+    <table id="member-table" class="member-table">
         <thead>
             <tr>
                 <th>Id</th>
                 <th>Nome</th>
+                <th>Tipos de Eventos Preferidos</th>
             </tr>
         </thead>
+        <tbody id="memberTableBody">
+            <!-- Linhas da tabela serão preenchidas dinamicamente -->
+        </tbody>
     </table>
 
     <!--Botões de Ação-->
@@ -36,11 +40,31 @@
         <button id="member-delete" class="action-button">Apagar</button>
     </div>
 
+    <!--Modal de Criação/Edição-->
+    <div id="createMemberModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="modal-title">Criar/Editar Membro</h2>
+            <form id="memberForm">
+                <label for="memberId">ID:</label>
+                <input type="number" id="memberId" disabled />
+
+                <label for="memberName">Nome:</label>
+                <input type="text" id="memberName" placeholder="Nome do membro" required />
+
+                <label for="memberFavoriteEventTypes">Tipos de Eventos Preferidos:</label>
+                <input type="text" id="memberFavoriteEventTypes" placeholder="Separados por vírgulas" />
+
+                <div class="modal-actions">
+                    <button type="button" id="saveMember" class="action-button">Gravar</button>
+                    <button type="button" id="cancelMember" class="action-button">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!--Rodapé-->
+    <footer>
+        <a class="about-link" href="about.html">About &copy; Tecnologia Setúbal &bull; Programação Web</a>
+    </footer>
 </body>
-
-<!--Rodapé-->
-<footer>
-    <a class="about-link" href="about.html">About &copy; Tecnologia Setúbal &bull; Programação Web</a>
-</footer>
-
 </html>

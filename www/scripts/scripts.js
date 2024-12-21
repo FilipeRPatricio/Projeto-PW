@@ -121,71 +121,71 @@ class Events {
 
 
 
-/**
- * Classe Member
- * 
- * @class Membro do Clube de Ciclismo.
- */
-class Member {
-    /**
-     * @property {number} id - Identificador único do membro
-     */
-    #id;
+// /**
+//  * Classe Member
+//  * 
+//  * @class Membro do Clube de Ciclismo.
+//  */
+// class Member {
+//     /**
+//      * @property {number} id - Identificador único do membro
+//      */
+//     #id;
 
-    /**
-     * @property {string} name - Nome do membro
-     */
-    #name;
+//     /**
+//      * @property {string} name - Nome do membro
+//      */
+//     #name;
 
-    /**
-     * @property {EventType[]} favoriteEventTypes - Tipos de eventos favoritos do membro
-     */
-    #favoriteEventTypes;
+//     /**
+//      * @property {EventType[]} favoriteEventTypes - Tipos de eventos favoritos do membro
+//      */
+//     #favoriteEventTypes;
 
-    /**
-     * @property {Events[]} registeredEvents - Eventos em que o membro está inscrito
-     */
-    #registeredEvents;
+//     /**
+//      * @property {Events[]} registeredEvents - Eventos em que o membro está inscrito
+//      */
+//     #registeredEvents;
 
-    /**
-     * @constructs Member
-     * 
-     * @param {number} id - Identificador único do membro
-     * @param {string} name 
-     */
-    constructor(id, name) {
-        this.#id = id;
-        this.#name = name;
-    }
+//     /**
+//      * @constructs Member
+//      * 
+//      * @param {number} id - Identificador único do membro
+//      * @param {string} name 
+//      */
+//     constructor(id, name) {
+//         this.#id = id;
+//         this.#name = name;
+//     }
 
-    /**
-     * @property {number} id - Identificador único deste membro
-     */
-    get id() {
-        return this.#id;
-    }
+//     /**
+//      * @property {number} id - Identificador único deste membro
+//      */
+//     get id() {
+//         return this.#id;
+//     }
 
-    /**
-     * @property {string} name - Nome deste membro
-     */
-    get name() {
-        return this.#name;
-    }
+//     /**
+//      * @property {string} name - Nome deste membro
+//      */
+//     get name() {
+//         return this.#name;
+//     }
 
-    /**
-     * @property {EventType[]} favoriteEventTypes - Tipos de eventos favoritos deste membro
-     */
-    get favoriteEventTypes() {
-        return this.#favoriteEventTypes;
-    }
+//     /**
+//      * @property {EventType[]} favoriteEventTypes - Tipos de eventos favoritos deste membro
+//      */
+//     get favoriteEventTypes() {
+//         return this.#favoriteEventTypes;
+//     }
 
-    /**
-     * @property {Events[]} registeredEvents - Eventos em que este membro está inscrito
-     */
-    get registeredEvents() {
-        return this.#registeredEvents;
-    }
-}
+//     /**
+//      * @property {Events[]} registeredEvents - Eventos em que este membro está inscrito
+//      */
+//     get registeredEvents() {
+//         return this.#registeredEvents;
+//     }
+// }
 
 
 
@@ -607,6 +607,17 @@ class EventManager {
     }
 }
 
+/**
+ * representa um membro
+ * @class
+ */
+class Member {
+    constructor(id, name){
+        this.id = id;
+        this.name = name;
+        this.favoriteEventTypes = []; //Lista de tipos de eventos favoritos
+    }
+}
 
 
 /**
@@ -618,8 +629,168 @@ class MemberManager {
     static currentId = 1;
 
     constructor() {
+        if(MemberManager.instance) return MemberManager.instance;
+
+        MemberManager.instance = this;
+        this.selectedID = undefined;
+        this.init();   //initialize
     }
+
+    /**
+     * inicializa os botões e a tabela
+     */
+
+    init() {
+        this.createButtons();
+        this.updateMemberTable();
+    }
+
+
+    //Adiciona membros a lista
+    createMember(name, favoriteEventTypes = []) {
+        const newMember = new Member(MemberManager.currentId, name);
+        newMember.favoriteEventTypes = favoriteEventTypes;
+        MemberManager.memberList.push(newMember);
+        MemberManager.currentId++;
+    }
+
+    //Atualizar/editar um membro existente
+    editMember(id, newName, newFavoriteEventTypes = []) {
+        const member = MemberManager.memberList.find(m => m.id === id);
+        if(member) {
+            member.name = newName;
+            member.favoriteEventTypes = newFavoriteEventTypes;
+        }
+    }
+
+    //delete member
+    deleteMember(id) {
+    MemberManager.memberList = MemberManager.memberList.filter(m => m.id !== id);
 }
+
+    //update member
+
+    //TODO:
+
+
+    //botões
+    creteButtons() {
+        document.getElementById("member-create").addEventListener("click", () => this.openModal());
+        document.getElementById("saveMember").addEventListener("click", () => this.saveMember());
+        document.getElementById("cancelMember").addEventListener("click", () => this.closeModal());
+        document.getElementById("member-edit").addEventListener("click", () => this.editSelectedMember());
+        document.getElementById("member-delete").addEventListener("click", () => this.deleteSelectedMember());
+    }
+
+
+    openModal(member = null) {
+        const modal = document.getElementById("createMemberModal");
+        modal.classList.remove("hidden");
+
+        if(member) {
+            document.getElementById("memberId").value = member.id;
+            document.getElementById("memberName").value = member.name;
+            document.getElementById("memberFavoriteEventTypes").value = 
+                member.favoriteEventTypes.map(e => e.description).join(", ");
+        } else {
+            document.getElementById("memberId").value = MemberManager.currentId;
+            document.getElementById("memberName").value = "";
+            document.getElementById("memberFavoriteEventTypes").value = "";
+        }
+    }
+
+    closeModal() {
+        const modal = document.getElementById("createMemberModal");
+        modal.classList.add("hidden");
+        document.getElementById("memberName").value = "";
+        document.getElementById("memberFavoriteEventTypes").values = "";
+    }
+
+    saveMember() {
+        const name = document.getElementById("memberName").value.trim();
+        const favoriteEventTypes = document.getElementById("memberFavoriteEventTypes").value
+            .split(",")
+            .map(desc => EventTypeManager.typeList.find(type => type.description.trim() === desc.trim()))
+            .filter(type => type);
+    
+        if (!name) {
+            alert("Insira um nome válido");
+            return;
+        }
+    
+        const id = parseInt(document.getElementById("memberId").value, 10); 
+    
+        if (MemberManager.memberList.some(m => m.id === id)) {
+            this.editMember(id, name, favoriteEventTypes);  // Corrigido aqui
+        } else {
+            this.createMember(name, favoriteEventTypes);
+        }
+    
+        this.closeModal();
+        this.updateMemberTable();
+    }
+    
+
+    editSelectedMember() {
+        if (this.selectedID !== undefined) {
+            const member = MemberManager.memberList.find(m => m.id === this.selectedID);
+            if (member) this.openModal(member);
+        } else {
+            alert("Selecione um membro.");
+        }
+    }
+
+    /**
+     * Exclui o membro selecionado.
+     */
+    deleteSelectedMember() {
+        if (this.selectedID !== undefined) {
+            const confirmed = confirm("Deseja mesmo apagar este membro?");
+            if (confirmed) {
+                this.deleteMember(this.selectedID);
+                this.selectedID = undefined;
+                this.updateMemberTable();
+            }
+        } else {
+            alert("Selecione um membro.");
+        }
+    }
+
+    updateMemberTable() {
+        const tableBody = document.getElementById("memberTableBody");
+        tableBody.innerHTML = "";  // Limpa a tabela antes de atualizar
+    
+        MemberManager.memberList.forEach(member => {
+            const row = document.createElement("tr");
+    
+            const idCell = document.createElement("td");
+            idCell.textContent = member.id;
+            row.appendChild(idCell);
+    
+            const nameCell = document.createElement("td");
+            nameCell.textContent = member.name;
+            row.appendChild(nameCell);
+    
+            row.addEventListener("click", () => this.selectMember(member.id));
+            tableBody.appendChild(row);
+        });
+    }
+    
+    selectMember(id) {
+        this.selectedID = id;
+        document.querySelectorAll("tr").forEach(row => row.classList.remove("selected"));
+        const selectedRow = document.querySelector(`tr[data-id='${id}']`);
+        selectedRow.classList.add("selected");
+    }
+    
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+   
+    const memberManager = new MemberManager();
+    memberManager.createButtons(); 
+    memberManager.updateMemberTable(); 
+});
 
 
 
