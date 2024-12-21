@@ -35,6 +35,11 @@ h2 {
     padding: 0; /* Remove padding extra */
 }
 
+tr.selected {
+    background-color:rgb(169, 247, 44);
+    font-weight: bold;
+}
+
 
 footer {
     width: calc(100% - 2 * var(--root-space));

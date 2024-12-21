@@ -672,9 +672,26 @@ class MemberManager {
         MemberManager.memberList = MemberManager.memberList.filter(m => m.id !== id);
     }
 
-    //update member
+    selectMemberFromTable() {
+        const table = document.getElementByNameById("member-table");
+        const tbody = table.querySelector("tbody");
+        if(!tbody) {
+            return
+        }
 
-    //TODO:
+        //iterar sobre todas as linhas e adicionar clique
+        tbody.querySelectorAll("tr").forEach(row => {
+            row.addEventListener("click", () => {
+                tbody.querySelectorAll("tr").forEach(r => r.classList.remove("selected"));
+                row.class.add("selected");
+
+                const cells = row.querySelectorAll("td");
+                if(cells.length < 0) {
+                    this.selectedID = parseInt(cells[0].textContent, 10);
+                }
+            })
+        })
+    }
 
 
     //botões
@@ -795,7 +812,7 @@ class MemberManager {
     
         MemberManager.memberList.forEach(member => {
             const row = document.createElement("tr");
-    
+            row.setAttribute("data-id", member.id); 
             const idCell = document.createElement("td");
             idCell.textContent = member.id;
             row.appendChild(idCell);
@@ -803,8 +820,6 @@ class MemberManager {
             const nameCell = document.createElement("td");
             nameCell.textContent = member.name;
             row.appendChild(nameCell);
-    
-            row.addEventListener("click", () => this.selectMember(member.id));
             tableBody.appendChild(row);
         });
     }
