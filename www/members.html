@@ -43,16 +43,16 @@
     <!--Modal de Criação/Edição-->
     <div id="createMemberModal" class="modal hidden">
         <div class="modal-content">
-            <h2 id="modal-title">Criar/Editar Membro</h2>
+            <h2 id="modal-title" class = "h2">Criar Membro</h2>
             <form id="memberForm">
                 <label for="memberId">ID:</label>
-                <input type="number" id="memberId" disabled />
+                <input style = "font-size: 20px; border: none; background: none; padding:0; margin:0;"type="number" id="memberId" readonly><br></br>
 
                 <label for="memberName">Nome:</label>
-                <input type="text" id="memberName" placeholder="Nome do membro" required />
+                <input type="text" id="memberName" placeholder="Nome do membro" required /><br></br>
 
                 <label for="memberFavoriteEventTypes">Tipos de Eventos Preferidos:</label>
-                <input type="text" id="memberFavoriteEventTypes" placeholder="Separados por vírgulas" />
+                <input type="text" id="memberFavoriteEventTypes" placeholder="Separados por vírgulas"/>
 
                 <div class="modal-actions">
                     <button type="button" id="saveMember" class="action-button">Gravar</button>

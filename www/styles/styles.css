@@ -20,6 +20,10 @@ body {
     font-family: Verdana, Helvetica, sans-serif;
 }
 
+h2 {
+    text-align: center;
+}
+
 /* Estilo do título*/
 .page-title {
     text-align: center;
