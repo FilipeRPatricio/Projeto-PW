@@ -222,7 +222,7 @@ class EventTypeManager {
     // Atualiza a descrição de um tipo de evento na tabela                      -----Trabalhar aqui 
     changeDescription(newDescription) {
         const table = document.getElementById("member-table");
-        const tbody = table.querySelector("tbody");
+        const tbody = table.getElementsByTagName("tbody");
 
         if (tbody) {
             Array.from(tbody.rows).forEach(row => {
@@ -246,12 +246,13 @@ class EventTypeManager {
      */
     updateEventTypeTable() {
         const table = document.getElementById("member-table");
-        console.log(table);
 
-        /*remove o tbody antigo e cria um novo*/
-        table.removeChild(table.getElementsByTagName("tbody")[0]);
-        const tbody = document.createElement("tbody");
-        table.appendChild(tbody);
+        const tbody = table.querySelector("tbody");
+        if (!tbody) {
+            return;
+        }
+
+        tbody.replaceChildren();
 
         
 
@@ -391,6 +392,9 @@ class EventTypeManager {
 
         // Botão "Apagar"
         const deleteButton = document.getElementById("type-delete");
+        if (!deleteButton) {
+            return;
+        }
 
         deleteButton.addEventListener("click", () => {
             if(this.selectedID === void 0) {
@@ -400,7 +404,7 @@ class EventTypeManager {
             const confirmed = confirm("Tem a certeza que deseja apagar este tipo de evento?");
             
             if(confirmed){
-                console.log("Lista antes da remoção")
+                console.log("Lista antes da remoção: ", EventTypeManager.typeList);
                 EventTypeManager.typeList = EventTypeManager.typeList.filter(type => type.id !== this.selectedID);
                 console.log("Lista após remoção: ", EventTypeManager.typeList);
                 this.selectedID = void 0; //Limpa
@@ -665,8 +669,8 @@ class MemberManager {
 
     //delete member
     deleteMember(id) {
-    MemberManager.memberList = MemberManager.memberList.filter(m => m.id !== id);
-}
+        MemberManager.memberList = MemberManager.memberList.filter(m => m.id !== id);
+    }
 
     //update member
 
@@ -674,20 +678,31 @@ class MemberManager {
 
 
     //botões
-    creteButtons() {
-        document.getElementById("member-create").addEventListener("click", () => this.openModal());
-        document.getElementById("saveMember").addEventListener("click", () => this.saveMember());
-        document.getElementById("cancelMember").addEventListener("click", () => this.closeModal());
-        document.getElementById("member-edit").addEventListener("click", () => this.editSelectedMember());
-        document.getElementById("member-delete").addEventListener("click", () => this.deleteSelectedMember());
+    createButtons() {
+        this.addEvent("member-create", "click", () => this.openModal());
+        this.addEvent("saveMember", "click", () => this.saveMember());
+        this.addEvent("cancelMember", "click", () => this.closeModal());
+        this.addEvent("member-edit", "click", () => this.editSelectedMember());
+        this.addEvent("member-delete", "click", () => this.deleteSelectedMember());
+    }
+
+    addEvent(id = "", event = "", func) {
+        const result = document.getElementById(id);
+        if (result && func) {
+            result.addEventListener(event, func);
+        }
     }
 
 
     openModal(member = null) {
         const modal = document.getElementById("createMemberModal");
+        if (!modal) {
+            return;
+        }
+
         modal.classList.remove("hidden");
 
-        if(member) {
+        if (member) {
             document.getElementById("memberId").value = member.id;
             document.getElementById("memberName").value = member.name;
             document.getElementById("memberFavoriteEventTypes").value = 
@@ -701,24 +716,38 @@ class MemberManager {
 
     closeModal() {
         const modal = document.getElementById("createMemberModal");
+        if (!modal) {
+            return;
+        }
+
         modal.classList.add("hidden");
         document.getElementById("memberName").value = "";
         document.getElementById("memberFavoriteEventTypes").values = "";
     }
 
     saveMember() {
-        const name = document.getElementById("memberName").value.trim();
-        const favoriteEventTypes = document.getElementById("memberFavoriteEventTypes").value
-            .split(",")
-            .map(desc => EventTypeManager.typeList.find(type => type.description.trim() === desc.trim()))
-            .filter(type => type);
+        let name = document.getElementById("memberName");
+        if (name) {
+            name = name.value.trim();
+        }
+
+        let favoriteEventTypes = document.getElementById("memberFavoriteEventTypes");
+        if (favoriteEventTypes && EventTypeManager.typeList) {
+            favoriteEventTypes = favoriteEventTypes.value
+                .split(",")
+                .map(desc => EventTypeManager.typeList.find(type => type.description.trim() === desc.trim()))
+                .filter(type => type);
+        }
     
         if (!name) {
             alert("Insira um nome válido");
+        }
+        
+        const memberId = document.getElementById("memberId");
+        if (!memberId) {
             return;
         }
-    
-        const id = parseInt(document.getElementById("memberId").value, 10); 
+        const id = parseInt(memberId.value, 10); 
     
         if (MemberManager.memberList.some(m => m.id === id)) {
             this.editMember(id, name, favoriteEventTypes);  // Corrigido aqui
@@ -732,33 +761,37 @@ class MemberManager {
     
 
     editSelectedMember() {
-        if (this.selectedID !== undefined) {
-            const member = MemberManager.memberList.find(m => m.id === this.selectedID);
-            if (member) this.openModal(member);
-        } else {
+        if (this.selectedID === void 0) {
             alert("Selecione um membro.");
         }
+
+        const member = MemberManager.memberList.find(m => m.id === this.selectedID);
+        if (member) this.openModal(member);
     }
 
     /**
      * Exclui o membro selecionado.
      */
     deleteSelectedMember() {
-        if (this.selectedID !== undefined) {
-            const confirmed = confirm("Deseja mesmo apagar este membro?");
-            if (confirmed) {
-                this.deleteMember(this.selectedID);
-                this.selectedID = undefined;
-                this.updateMemberTable();
-            }
-        } else {
+        if (this.selectedID === void 0) {
             alert("Selecione um membro.");
+        }
+
+        const confirmed = confirm("Deseja mesmo apagar este membro?");
+        if (confirmed) {
+            this.deleteMember(this.selectedID);
+            this.selectedID = undefined;
+            this.updateMemberTable();
         }
     }
 
     updateMemberTable() {
         const tableBody = document.getElementById("memberTableBody");
-        tableBody.innerHTML = "";  // Limpa a tabela antes de atualizar
+        if (!tableBody) {
+            return;
+        }
+
+        tableBody.replaceChildren();  // Limpa a tabela antes de atualizar
     
         MemberManager.memberList.forEach(member => {
             const row = document.createElement("tr");
@@ -780,17 +813,12 @@ class MemberManager {
         this.selectedID = id;
         document.querySelectorAll("tr").forEach(row => row.classList.remove("selected"));
         const selectedRow = document.querySelector(`tr[data-id='${id}']`);
-        selectedRow.classList.add("selected");
+        if (selectedRow) {
+            selectedRow.classList.add("selected");
+        }
     }
     
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-   
-    const memberManager = new MemberManager();
-    memberManager.createButtons(); 
-    memberManager.updateMemberTable(); 
-});
 
 
 
@@ -799,15 +827,15 @@ window.onload = function () {
     const eventTypeManager = new EventTypeManager();
     const eventManager = new EventManager();
     const memberManager = new MemberManager();
-    
-   const pageActions = {
-    "EventType": () => eventTypeManager.updateEventTypeTable(),
-    "Events": () => eventManager.updateEvents(),
-    "Members": () => {},
-   };
 
-   const action = pageActions[document.body.id];
-   if(action) {
-    action();
-   }
+    const pageActions = {
+        "EventType": () => eventTypeManager.updateEventTypeTable(),
+        "Events": () => eventManager.updateEvents(),
+        "Members": () => memberManager.updateMemberTable()
+    };
+
+    const action = pageActions[document.body.id];
+    if(action) {
+        action();
+    }
 }
