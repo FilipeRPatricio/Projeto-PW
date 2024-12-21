@@ -11,12 +11,12 @@ class EventType {
     /**
      * @property {number} id - Identificador único do tipo de evento
      */
-    #id;
+    id;
 
     /**
      * @property {string} description - Descritivo do tipo de evento
      */
-    #description;
+    description;
 
     /**
      * @constructs EventType
@@ -25,22 +25,8 @@ class EventType {
      * @param {string} description - Descritivo para o tipo de evento
      */
     constructor(id, description) {
-        this.#id = id;
-        this.#description = description;
-    }
-
-    /**
-     * @property {number} id - Identificator único deste tipo de evento
-     */
-    get id() {
-        return this.#id;
-    }
-
-    /**
-     * @property {string} description - Descritivo deste tipo de evento
-     */
-    get description() {
-        return this.#description;
+        this.id = id;
+        this.description = description;
     }
 }
 
@@ -196,13 +182,11 @@ class Events {
  */
 class EventTypeManager {
    
-      static typeList;
-      static currentId;
+      static typeList = [];
+      static currentId = 1;
 
     constructor() {
-        EventTypeManager.typeList = [];
-        EventTypeManager.currentId = 1;
-        this.selectedID = undefined;        //tipo de evento selecionado inicialmente undef
+        this.selectedID = null;        //tipo de evento selecionado inicialmente
         this.createButtons();
     }
 
@@ -217,8 +201,6 @@ class EventTypeManager {
         return newType; 
     }
 
-
-       
     // Atualiza a descrição de um tipo de evento na tabela                      -----Trabalhar aqui 
     changeDescription(newDescription) {
         const table = document.getElementById("member-table");
@@ -236,10 +218,6 @@ class EventTypeManager {
             });
         }
     }
-
-
-
-
 
      /**
      * Atualiza a tabela com os tipos de eventos.
@@ -268,7 +246,7 @@ class EventTypeManager {
 
                 // atualiza id selecionado
                 this.selectedID = type.id;
-        })
+            })
 
             tbody.appendChild(row);
         });
@@ -292,7 +270,23 @@ class EventTypeManager {
 
         return result;
     }
+    
+    /**
+     * @param {number} id
+     * @param {string} newDescription
+     */
+    editType(id, newDescription) {
+        const type = EventTypeManager.typeList.find(type => type.id === id);
+        if (type) {
+            type.description = newDescription;
+        }
+    }
 
+    // TODO: Refactor createButtons method
+    /**
+     * 
+     * @returns 
+     */
     createButtons() {
         // Botão "Criar"
         const createButton = document.getElementById("type-create");
@@ -316,20 +310,26 @@ class EventTypeManager {
                 const descriptionInput = document.getElementById("eventTypeDescription");
                 const description = descriptionInput.value.trim();
 
-                if (description) {
-                    console.log(description);
+                if (!description) {
+                    alert("Por favor, insira uma descrição.");
+                    return;
+                }
+
+                const id = parseInt(document.getElementById("eventTypeId").value);
 
                 // Criar novo tipo de evento e atualizar tabela
-                this.createType(description);
+                if (EventTypeManager.typeList.find(type => type.id === id)) {
+                    this.editType(id, description);
+                } else {
+                    this.createType(description);
+                }
 
-                    // Fechar modal e limpar campo
-                    document.getElementById("createEventTypeModal").classList.add("hidden");
-                    descriptionInput.value = "";
+                // Fechar modal e limpar campo
+                document.getElementById("createEventTypeModal").classList.add("hidden");
+                descriptionInput.value = "";
 
                 this.updateEventTypeTable();
-                } else {
-                    alert("Por favor, insira uma descrição.");
-                }
+                
             });
         }
 
@@ -346,7 +346,6 @@ class EventTypeManager {
             });
         }
 
-
         // Botão "Editar"
         const editButton = document.getElementById("type-edit");
 
@@ -354,10 +353,13 @@ class EventTypeManager {
             editButton.addEventListener("click", () => {
                 if(this.selectedID === void 0) {
                     alert("Por favor, selecione um tipo de evento antes de editar.");
+                    return;
                 }
+
                 const selectedType = EventTypeManager.typeList.find(type => type.id ===  this.selectedID);
                 if(!selectedType) {
                     alert("ERRO: Tipo de evento selecionado não encontrado.");
+                    return;
                 }
                 const modal = document.getElementById("createEventTypeModal");
                 modal.classList.remove("hidden");
@@ -368,23 +370,24 @@ class EventTypeManager {
 
                 // Ajusta o comportamento do botão de salvar para edição
                 document.getElementById("saveEventType").onclick = () => {
-                    const newDescription = document.getElementById("eventTypeDescription").value.trim();
-
-                    if (!newDescription.length) {
-                        alert("Por favor, insira uma descrição válida.");
+                    let newDescription = document.getElementById("eventTypeDescription");
+                    if (!newDescription) {
+                        return;
                     }
 
+                    newDescription = newDescription.value;
+
                     // Atualiza a descrição do tipo de evento selecionado
-                    eventManager.editType(this.selectedID, newDescription);
+                    // this.editType(this.selectedID, newDescription);
 
                     // Atualiza a tabela
-                    this.updateEventTypeTable();
+                    //this.updateEventTypeTable();
 
                     // Fecha o modal
                     modal.classList.add("hidden");
 
                     // Limpa o campo de descrição
-                    document.getElementById("eventTypeDescription").value = "";
+                    //document.getElementById("eventTypeDescription").value = "";
                 };
             });
         }
@@ -399,6 +402,7 @@ class EventTypeManager {
         deleteButton.addEventListener("click", () => {
             if(this.selectedID === void 0) {
                 alert("Tem que selecionar um tipo de evento antes de apagar.");
+                return;
             }
             console.log("ID selecionado antes da confirmação: " , this.selectedID);
             const confirmed = confirm("Tem a certeza que deseja apagar este tipo de evento?");
@@ -413,8 +417,9 @@ class EventTypeManager {
         });
 
     }
-
 }
+
+
 
 /**
  * Classe EventManager
@@ -444,9 +449,6 @@ class EventManager {
 
 //--------------------------------------------criar-----------------------------------------------------------------------
     /**
-     * @property {Button} createButton - Botão para criar novos eventos
-     */
-        /**
     * cria um novo tipo de evento
     * @param {string} description
     */
@@ -456,20 +458,7 @@ class EventManager {
         EventTypeManager.currentId++;
         return newType;
     }
-//-----------------------------------------editar-------------------------------------------------------------------------
-    /**
-     * @property {Button} editButton - Botão para editar eventos
-     * @param {number} id
-     * @param {string} newDescription
-     */
-    editType(id, newDescription) {
-        const typeIndex = EventTypeManager.typeList.findIndex(type => type.id === id);
-        if(typeIndex !== -1) {
-            EventTypeManager.typeList[typeIndex].description = newDescription;
-        } else {
-            console.error("ERRO: tipo de evento não encontrado.");
-        }
-    }
+
 //------------------------------------------apagar----------------------------------------------------------------------------------
     /**
      * @property {Button} deleteButton - Botão para apagar eventos
@@ -529,17 +518,14 @@ class EventManager {
     setActions() {
         this.createButton.addEventListener("click", () => {
             this.createEvent();
-            console.log("create");
         });
 
         this.editButton.addEventListener("click", () => {
             this.editEvent();
-            console.log("edit");
         });
 
         this.deleteButton.addEventListener("click", () => {
             this.deleteEvent();
-            console.log("delete");
         });
     }
 
@@ -624,6 +610,7 @@ class Member {
 }
 
 
+
 /**
  * @class Gestor de Membros (criar, editar, apagar)
  */
@@ -631,13 +618,15 @@ class MemberManager {
     
     static memberList = [];
     static currentId = 1;
+    static instance;
+    selectedId;
 
     constructor() {
         if(MemberManager.instance) return MemberManager.instance;
 
-        MemberManager.instance = this;
-        this.selectedID = undefined;
+        this.selectedID = null;
         this.init();   //initialize
+        MemberManager.instance = this;
     }
 
     /**
@@ -650,7 +639,7 @@ class MemberManager {
     }
 
 
-    //Adiciona membros a lista
+    // Adiciona membros a lista
     createMember(name, favoriteEventTypes = []) {
         const newMember = new Member(MemberManager.currentId, name);
         newMember.favoriteEventTypes = favoriteEventTypes;
@@ -658,7 +647,7 @@ class MemberManager {
         MemberManager.currentId++;
     }
 
-    //Atualizar/editar um membro existente
+    // Atualizar/Editar um membro existente
     editMember(id, newName, newFavoriteEventTypes = []) {
         const member = MemberManager.memberList.find(m => m.id === id);
         if(member) {
@@ -667,34 +656,12 @@ class MemberManager {
         }
     }
 
-    //delete member
+    // Delete member
     deleteMember(id) {
         MemberManager.memberList = MemberManager.memberList.filter(m => m.id !== id);
     }
 
-    selectMemberFromTable() {
-        const table = document.getElementByNameById("member-table");
-        const tbody = table.querySelector("tbody");
-        if(!tbody) {
-            return
-        }
-
-        //iterar sobre todas as linhas e adicionar clique
-        tbody.querySelectorAll("tr").forEach(row => {
-            row.addEventListener("click", () => {
-                tbody.querySelectorAll("tr").forEach(r => r.classList.remove("selected"));
-                row.class.add("selected");
-
-                const cells = row.querySelectorAll("td");
-                if(cells.length < 0) {
-                    this.selectedID = parseInt(cells[0].textContent, 10);
-                }
-            })
-        })
-    }
-
-
-    //botões
+    // Botões
     createButtons() {
         this.addEvent("member-create", "click", () => this.openModal());
         this.addEvent("saveMember", "click", () => this.saveMember());
@@ -758,6 +725,7 @@ class MemberManager {
     
         if (!name) {
             alert("Insira um nome válido");
+            return;
         }
         
         const memberId = document.getElementById("memberId");
@@ -767,7 +735,7 @@ class MemberManager {
         const id = parseInt(memberId.value, 10); 
     
         if (MemberManager.memberList.some(m => m.id === id)) {
-            this.editMember(id, name, favoriteEventTypes);  // Corrigido aqui
+            this.editMember(id, name, favoriteEventTypes);
         } else {
             this.createMember(name, favoriteEventTypes);
         }
@@ -775,11 +743,33 @@ class MemberManager {
         this.closeModal();
         this.updateMemberTable();
     }
-    
+
+    /**
+     * Selects a member from the table via on-click
+     * 
+     * @param {*} tbody 
+     * @param {*} row 
+     * @returns 
+     */
+    selectMemberFromTable(tbody, row) {
+        if (!tbody) {
+            return;
+        }
+
+        // Apaga o último selecionado
+        tbody.querySelectorAll("tr").forEach(r => r.classList.remove("selected"));
+        row.classList.add("selected");
+
+        const cells = row.querySelectorAll("td");
+        if (cells.length > 0) {
+            this.selectedID = parseInt(cells[0].textContent, 10);
+        }
+    }
 
     editSelectedMember() {
         if (this.selectedID === void 0) {
             alert("Selecione um membro.");
+            return;
         }
 
         const member = MemberManager.memberList.find(m => m.id === this.selectedID);
@@ -792,12 +782,13 @@ class MemberManager {
     deleteSelectedMember() {
         if (this.selectedID === void 0) {
             alert("Selecione um membro.");
+            return;
         }
 
         const confirmed = confirm("Deseja mesmo apagar este membro?");
         if (confirmed) {
             this.deleteMember(this.selectedID);
-            this.selectedID = undefined;
+            this.selectedID = null;
             this.updateMemberTable();
         }
     }
@@ -812,14 +803,20 @@ class MemberManager {
     
         MemberManager.memberList.forEach(member => {
             const row = document.createElement("tr");
-            row.setAttribute("data-id", member.id); 
+            row.setAttribute("data-id", member.id);
+
             const idCell = document.createElement("td");
             idCell.textContent = member.id;
             row.appendChild(idCell);
-    
+
             const nameCell = document.createElement("td");
             nameCell.textContent = member.name;
             row.appendChild(nameCell);
+
+            row.addEventListener("click", () => {
+                this.selectMemberFromTable(tableBody, row);
+            });
+
             tableBody.appendChild(row);
         });
     }
