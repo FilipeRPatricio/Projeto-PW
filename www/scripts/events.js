@@ -1,9 +1,8 @@
 "use strict";
 
-// Selecionar o corpo do documento
 const body = document.body;
 
-// Cabeçalho principal
+
 const header = document.createElement("h1");
 header.className = "name";
 header.textContent = "ESTSBike - Clube de Ciclismo";
@@ -20,7 +19,7 @@ const links = [
   { id: "Tipos-de-Eventos", href: "#EventType", text: "Event Types" },
 ];
 
-// Criar os botões de navegação
+
 links.forEach(link => {
   const a = document.createElement("a");
   a.id = link.id;
@@ -39,7 +38,7 @@ links.forEach(link => {
 
 body.appendChild(navBar);
 
-// Função para alternar entre páginas/sections
+// Função para alternar entre sections
 function navigateTo(pageId) {
   // Esconde todas as secções
   document.querySelectorAll(".page").forEach(page => page.classList.add("hidden"));
@@ -55,17 +54,17 @@ const eventsSection = document.createElement("section");
 eventsSection.id = "Events";
 eventsSection.className = "page";
 
-// Título da secção
+
 const pageTitle = document.createElement("h1");
 pageTitle.className = "page-title";
 pageTitle.textContent = "Eventos";
 eventsSection.appendChild(pageTitle);
 
-// Tabela de Eventos
+
 const table = document.createElement("table");
 table.className = "event-table";
 
-// Cabeçalho da tabela
+
 const thead = document.createElement("thead");
 const headerRow = document.createElement("tr");
 ["ID", "Tipo", "Descritivo", "Data"].forEach(text => {
@@ -76,14 +75,14 @@ const headerRow = document.createElement("tr");
 thead.appendChild(headerRow);
 table.appendChild(thead);
 
-// Corpo da tabela
+
 const tbody = document.createElement("tbody");
 table.appendChild(tbody);
 
-// Adiciona a tabela à secção de eventos
+
 eventsSection.appendChild(table);
 
-// Botões para Criar, Editar e Apagar Eventos
+
 const buttonContainer = document.createElement("div");
 buttonContainer.className = "button-container";
 
@@ -96,7 +95,6 @@ actionButtons.forEach(action => {
   buttonContainer.appendChild(button);
 });
 
-// Adiciona os botões à secção de eventos
 eventsSection.appendChild(buttonContainer);
 
 // Adiciona a secção de eventos ao corpo
@@ -115,7 +113,7 @@ eventTypeSection.className = "page hidden";
 eventTypeSection.innerHTML = "<h1 class='page-title'>Tipos de Eventos</h1>";
 body.appendChild(eventTypeSection);
 
-// Rodapé
+
 const footer = document.createElement("footer");
 const footerLink = document.createElement("a");
 footerLink.className = "about-link";
