@@ -44,7 +44,7 @@ class Events {
     id;
 
     /**
-     * @property {EventType | string} type - Tipo de evento
+     * @property {EventType} type - Tipo de evento
      */
     type;
 
@@ -62,7 +62,7 @@ class Events {
      * @constructs Events
      * 
      * @param {number} id - Identificador único do evento
-     * @param {EventType | string} type - O tipo de evento para o evento
+     * @param {EventType} type - O tipo de evento para o evento
      * @param {string} description - O descritivo para o evento
      * @param {Date | string} date - A data para o evento
      */
@@ -93,7 +93,7 @@ class Member {
     description;
 
     /**
-     * @property {EventType[] | string[]} favoriteEventTypes - Tipos de eventos favoritos do membro
+     * @property {EventType[]} favoriteEventTypes - Tipos de eventos favoritos do membro
      */
     favoriteEventTypes;
 
@@ -117,9 +117,12 @@ class Member {
 
 
 /**
+ * Classe ElementManager
  * 
+ * @class Gestor de Elementos
  */
 class ElementManager {}
+
 
 
 /**
@@ -130,7 +133,7 @@ class ElementManager {}
 class EventTypeManager extends ElementManager {
 
     /**
-     * @property {EventType[] | string[]} typeList - Lista de tipos de eventos
+     * @property {EventType[]} typeList - Lista de tipos de eventos
      * @static
      */
     static typeList = [];
@@ -146,39 +149,28 @@ class EventTypeManager extends ElementManager {
      */
     constructor() {
         super();
-        this.createButtons();
+        this.init();
     }
 
     /**
-    * Cria um novo tipo de evento e adiciona-o à lista.
-    * 
-    * @param {string} description - Descrição do tipo de evento.
-    */
-    createType(description){
-        const newType = new EventType(EventTypeManager.currentId, description);
-        EventTypeManager.typeList.push(newType);
-        EventTypeManager.currentId++;
-        return newType; 
-    }
-    
-    /**
-     * 
-     * 
-     * @param {number} id - 
-     * @param {string} newDescription - 
+     * Inicializa os botões e a tabela
      */
-    editType(id, newDescription) {
-        const type = EventTypeManager.typeList.find(type => type.id === id);
-        if (type) {
-            type.description = newDescription;
-        }
+    init() {
+        this.initializeButtons();
+
+        // Valores Default para Testes
+        this.createType("BTT");
+        this.createType("Track");
+        this.createType("BMX");
+
+        tableManager.updateTable(EventTypeManager, EventTypeManager.typeList);
     }
 
     /**
      * Cria as ações do botões de gerenciamento de tipos de eventos.
      * (Criar, Editar, Apagar, Guardar e Cancelar)
      */
-    createButtons() {
+    initializeButtons() {
         // Botão "Criar"
         this.#createTypeButton();
 
@@ -193,6 +185,30 @@ class EventTypeManager extends ElementManager {
         
         // Botão "Apagar"
         this.#deleteTypeButton();
+    }
+
+    /**
+    * Cria um novo tipo de evento e adiciona-o à lista.
+    * 
+    * @param {string} description - Descrição do tipo de evento.
+    */
+    createType(description){
+        const newType = new EventType(EventTypeManager.currentId++, description);
+        EventTypeManager.typeList.push(newType);
+        return newType;
+    }
+    
+    /**
+     * Edita um tipo de evento a partir do seu id.
+     * 
+     * @param {number} id - 
+     * @param {string} newDescription - 
+     */
+    editType(id, newDescription) {
+        const type = EventTypeManager.typeList.find(type => type.id === id);
+        if (type) {
+            type.description = newDescription;
+        }
     }
 
     /**
@@ -276,12 +292,14 @@ class EventTypeManager extends ElementManager {
 
         if (editButton) {
             editButton.addEventListener("click", () => {
-                if(this.selectedID === void 0) {
+
+                const selectedID = tableManager.getSelectedElementID();
+                if (selectedID < 0) {
                     alert("Por favor, selecione um tipo de evento antes de editar.");
                     return;
                 }
 
-                const selectedType = EventTypeManager.typeList.find(type => type.id ===  this.selectedID);
+                const selectedType = EventTypeManager.typeList.find(type => type.id ===  selectedID);
                 if(!selectedType) {
                     alert("Erro, tipo de evento selecionado não encontrado.");
                     return;
@@ -320,16 +338,16 @@ class EventTypeManager extends ElementManager {
         if (deleteButton) {
             deleteButton.addEventListener("click", () => {
 
-                if(!this.selectedID) {
-                    alert("Tem que selecionar um tipo de evento antes de apagar.");
+                const selectedID = tableManager.getSelectedElementID();
+                if (selectedID < 0) {
+                    alert("Selecione um tipo de evento antes de apagar.");
                     return;
                 }
 
                 const confirmed = confirm("Tem a certeza que deseja apagar este tipo de evento?");
                 
                 if(confirmed){
-                    EventTypeManager.typeList = EventTypeManager.typeList.filter(type => type.id !== this.selectedID);
-                    this.selectedID = null;
+                    EventTypeManager.typeList = EventTypeManager.typeList.filter(type => type.id !== selectedID);
                     tableManager.updateTable(EventTypeManager, EventTypeManager.typeList);
                 }
             });
@@ -362,20 +380,32 @@ class EventManager extends ElementManager {
      */
     constructor() {
         super();
-        this.initializeButtons();
+        this.init();
     }
 
+    /**
+     * Inicializa os botões e a tabela
+     */
+    init() {
+        this.initializeButtons();
 
+        // Valores Default para Testes
+        this.createEvent("BTT", "Mountain Biking", "2025-7-14");
+        this.createEvent("Track", "Classic", "2025-5-22");
+        this.createEvent("BMX", "Freestyle", "2025-2-13");
+
+        tableManager.updateTable(EventManager, EventManager.eventList);
+    }
 
     /**
      * Inicializa os botões de ação.
      */
     initializeButtons() {
-        this.createButton = document.getElementById("Criar");
+        this.createButton = document.getElementById("event-create");
         this.saveButton = document.getElementById("save-event");
         this.cancelButton = document.getElementById("cancel-event");
-        this.editButton = document.getElementById("Editar");
-        this.deleteButton = document.getElementById("Apagar");
+        this.editButton = document.getElementById("event-edit");
+        this.deleteButton = document.getElementById("event-delete");
 
         if (this.createButton && this.editButton && this.deleteButton) {
             this.setActions();
@@ -407,9 +437,8 @@ class EventManager extends ElementManager {
         });
     }
 
-
-
     /**
+     * Retorna uma data em string no formato 'DD-MM-YYYY'.
      * 
      * @param {Date | string} date 
      * @returns 
@@ -423,12 +452,17 @@ class EventManager extends ElementManager {
         return result;
     }
 
-
-
     /**
      * Cria um novo evento e adiciona-o à lista.
      */
     createEvent(type, description, date) {
+        // Encontra o tipo de evento com a mesma descrição
+        const eventType = EventTypeManager.typeList.find(t => t.description === type);
+        if (!(eventType instanceof EventType)) {
+            alert("Tipo de evento não encontrado.")
+            return;
+        }
+        
         EventManager.eventList.push(new Events(EventManager.currentId++, type, description, date));
     }
 
@@ -545,12 +579,13 @@ class EventManager extends ElementManager {
      * @returns 
      */
     editSelectedMember() {
-        if (!this.selectedID) {
+        const selectedID = tableManager.getSelectedElementID();
+        if (selectedID < 0) {
             alert("Selecione um membro.");
             return;
         }
 
-        const event = EventManager.eventList.find(ev => ev.id === this.selectedID);
+        const event = EventManager.eventList.find(ev => ev.id === selectedID);
         if (event) this.openModal(event);
     }
 
@@ -560,15 +595,15 @@ class EventManager extends ElementManager {
      * @returns 
      */
     deleteSelectedMember() {
-        if (!this.selectedID) {
+        const selectedID = tableManager.getSelectedElementID();
+        if (selectedID < 0) {
             alert("Selecione um evento.");
             return;
         }
 
         const confirmed = confirm("Deseja mesmo apagar este evento?");
         if (confirmed) {
-            this.deleteEvent(this.selectedID);
-            this.selectedID = null;
+            this.deleteEvent(selectedID);
             tableManager.updateTable(EventManager, EventManager.eventList);
         }
     }
@@ -603,13 +638,17 @@ class MemberManager extends ElementManager {
         this.init();
     }
 
-
-
     /**
      * Inicializa os botões e a tabela.
      */
     init() {
         this.createButtons();
+
+        // Valores Default para Testes
+        this.createMember("Tiago");
+        this.createMember("Filipe");
+        this.createMember("João");
+
         tableManager.updateTable(MemberManager, MemberManager.memberList);
     }
 
@@ -617,11 +656,15 @@ class MemberManager extends ElementManager {
      * Cria um novo membro.
      * 
      * @param {string} description - O nome do membro a criar
-     * @param {EventType[] | string[]} favoriteEventTypes - Os tipos de eventos preferidos do membro a criar
+     * @param {EventType[]} favoriteEventTypes - Os tipos de eventos preferidos do membro a criar
      */
     createMember(description, favoriteEventTypes = []) {
+        // Filtra os tipos de eventos preferidos que são da classe EventType
+        const validTypes = favoriteEventTypes.filter(type => type instanceof EventType);
+
         const newMember = new Member(MemberManager.currentId, description);
-        newMember.favoriteEventTypes = favoriteEventTypes;
+        newMember.favoriteEventTypes = validTypes;
+
         MemberManager.memberList.push(newMember);
         MemberManager.currentId++;
     }
@@ -631,13 +674,15 @@ class MemberManager extends ElementManager {
      * 
      * @param {number} id - O id do membro a editar
      * @param {string} newdescription - O novo nome do membro
-     * @param {EventType[] | string[]} newFavoriteEventTypes - Os novos tipos de eventos preferidos do membro a editar
+     * @param {EventType[]} newFavoriteEventTypes - Os novos tipos de eventos preferidos do membro a editar
      */
     editMember(id, newdescription, newFavoriteEventTypes = []) {
         const member = MemberManager.memberList.find(m => m.id === id);
         if(member) {
+            const validTypes = newFavoriteEventTypes.filter(type => type instanceof EventType);
+
             member.description = newdescription;
-            member.favoriteEventTypes = newFavoriteEventTypes;
+            member.favoriteEventTypes = validTypes;
         }
     }
 
@@ -678,7 +723,7 @@ class MemberManager extends ElementManager {
     /**
      * Abre a aba de criação ou edição de membro, caso seja recebido um parâmetro.
      * 
-     * @param {Member} member - o membro a editar
+     * @param {Member} member - O membro a editar
      * @returns 
      */
     openModal(member = null) {
@@ -764,12 +809,13 @@ class MemberManager extends ElementManager {
      * @returns 
      */
     editSelectedMember() {
-        if (this.selectedID === null) {
+        const selectedID = tableManager.getSelectedElementID();
+        if (selectedID < 0) {
             alert("Selecione um membro.");
             return;
         }
 
-        const member = MemberManager.memberList.find(m => m.id === this.selectedID);
+        const member = MemberManager.memberList.find(m => m.id === selectedID);
         if (member) this.openModal(member);
     }
 
@@ -779,15 +825,15 @@ class MemberManager extends ElementManager {
      * @returns 
      */
     deleteSelectedMember() {
-        if (this.selectedID === null) {
+        const selectedID = tableManager.getSelectedElementID();
+        if (selectedID < 0) {
             alert("Selecione um membro.");
             return;
         }
 
         const confirmed = confirm("Deseja mesmo apagar este membro?");
         if (confirmed) {
-            this.deleteMember(this.selectedID);
-            this.selectedID = null;
+            this.deleteMember(selectedID);
             tableManager.updateTable(MemberManager, MemberManager.memberList);
         }
     }
@@ -796,7 +842,9 @@ class MemberManager extends ElementManager {
 
 
 /**
+ * Classe TableManager
  * 
+ * @class Gestor de Tabela (Atualizar, Selecionar)
  */
 class TableManager {
     /**
@@ -921,6 +969,11 @@ class TableManager {
         }
     }
 
+    /**
+     * Retorna o id do elemento selecionado
+     * 
+     * @returns o id selecionado
+     */
     getSelectedElementID() {
         return this.selectedID;
     }

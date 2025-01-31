@@ -23,7 +23,7 @@
         </div>
 
         <!-- Secção: Eventos -->
-        <div id="Events" class="page hidden">
+        <div id="Events" class="page">
             <h1 class="page-title">Eventos</h1>
 
             <table id="event-table" class="member-table">
@@ -40,7 +40,14 @@
                 </tbody>
             </table>
             
-            <div id="event-modal" class="event">
+            <!-- Botões para Modificar Eventos -->
+            <div class="button-container">
+                <button id="event-create" class="action-button">Criar</button>
+                <button id="event-edit" class="action-button">Editar</button>
+                <button id="event-delete" class="action-button">Apagar</button>
+            </div>
+            
+            <div id="event-modal" class="modal hidden">
                 <div class="modal-content">
                     <h2 id="modal-title" class="h2">Criar Evento</h2>
 
@@ -84,6 +91,7 @@
                 </tbody>
             </table>
 
+            <!-- Botões para Modificar Tipos de Eventos -->
             <div class="button-container">
                 <button id="type-create" class="action-button">Criar</button>
                 <button id="type-edit" class="action-button">Editar</button>
@@ -130,6 +138,7 @@
                 </tbody>
             </table>
 
+            <!-- Botões para Modificar Membros -->
             <div class="button-container">
                 <button id="member-create" class="action-button">Criar</button>
                 <button id="member-edit" class="action-button">Editar</button>
