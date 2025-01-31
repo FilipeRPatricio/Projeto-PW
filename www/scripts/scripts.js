@@ -88,9 +88,9 @@ class Member {
     id;
 
     /**
-     * @property {string} name - Nome do membro
+     * @property {string} description - Nome do membro
      */
-    name;
+    description;
 
     /**
      * @property {EventType[] | string[]} favoriteEventTypes - Tipos de eventos favoritos do membro
@@ -106,16 +106,20 @@ class Member {
      * @constructs Member
      * 
      * @param {number} id - Identificador único do membro
-     * @param {string} name - Nome do membro
+     * @param {string} description - Nome do membro
      */
-    constructor(id, name) {
+    constructor(id, description) {
         this.id = id;
-        this.name = name;
+        this.description = description;
     }
 }
 
 
 
+/**
+ * 
+ */
+class ElementManager {}
 
 
 /**
@@ -123,7 +127,7 @@ class Member {
  * 
  * @class Gestor de Tipos de Eventos (criar, editar, apagar).
  */
-class EventTypeManager {
+class EventTypeManager extends ElementManager {
 
     /**
      * @property {EventType[] | string[]} typeList - Lista de tipos de eventos
@@ -138,15 +142,16 @@ class EventTypeManager {
     static currentId = 1;
 
     /**
-     * @property {number} selectedId - Id selecionado na tabela
+     * @property {TableManager} tableManager - Gestor de tabelas
      */
-    selectedID;
+    tableManager;
 
     /**
      * @constructs EventTypeManager
      */
-    constructor() {
-        this.selectedID = null;        //tipo de evento selecionado inicialmente
+    constructor(tableManager) {
+        super();
+        this.tableManager = tableManager;
         this.createButtons();
     }
 
@@ -160,66 +165,6 @@ class EventTypeManager {
         EventTypeManager.typeList.push(newType);
         EventTypeManager.currentId++;
         return newType; 
-    }
-
-     /**
-     * Atualiza a tabela com os tipos de eventos.
-     * 
-     * @returns 
-     */
-    updateEventTypeTable() {
-        const table = document.getElementById("member-table");
-
-        const tbody = table.querySelector("tbody");
-        if (!tbody) {
-            return;
-        }
-
-        tbody.replaceChildren();
-
-        
-
-        EventTypeManager.typeList.forEach(type => {
-            const row = this.#addTableRow(type);
-
-            //Adiciona evento de clique para selecionar uma linha
-
-            row.addEventListener("click", () =>{
-
-                document.querySelectorAll("#member-table tbody tr").forEach(r => r.classList.remove("selected"));
-                row.classList.add("selected");
-
-                // atualiza id selecionado
-                this.selectedID = type.id;
-            })
-
-            tbody.appendChild(row);
-        });
-    }
-
-    /**
-     * Cria e retorna uma linha de tabela com os valores de um tipo de evento.
-     * 
-     * @param {EventType} type - o tipo de evento para a nova linha da tabela
-     * @returns uma nova linha para a tabela de tipos de eventos
-     */
-    #addTableRow(type) {
-        let result = document.createElement('tr');
-
-        // Array para iterar sobre cada parâmetro
-        const typeValues = [
-            type.id,
-            type.description
-        ]
-
-        // Adicionar uma coluna na tabela para cada parâmetro no evento
-        typeValues.forEach(parameter => {
-            const td = document.createElement('td');
-            td.textContent = parameter;
-            result.appendChild(td);
-        });
-
-        return result;
     }
     
     /**
@@ -304,7 +249,7 @@ class EventTypeManager {
                 document.getElementById("createEventTypeModal").classList.add("hidden");
                 descriptionInput.value = "";
 
-                this.updateEventTypeTable();
+                this.tableManager.updateTable(EventTypeManager, EventTypeManager.typeList);
                 
             });
         }
@@ -391,7 +336,7 @@ class EventTypeManager {
                 if(confirmed){
                     EventTypeManager.typeList = EventTypeManager.typeList.filter(type => type.id !== this.selectedID);
                     this.selectedID = null;
-                    this.updateEventTypeTable();
+                    this.tableManager.updateTable(EventTypeManager, EventTypeManager.typeList);
                 }
             });
         }
@@ -405,7 +350,7 @@ class EventTypeManager {
  * 
  * @class Gestor de Eventos (criar, editar, apagar).
  */
-class EventManager {
+class EventManager extends ElementManager {
     /**
      * @property {Events[]} eventList - Lista de eventos disponíveis
      * @static
@@ -419,15 +364,16 @@ class EventManager {
     static currentId = 1;
 
     /**
-     * @property {number} selectedId - Id selecionado na tabela
+     * @property {TableManager} tableManager - Gestor da tabela
      */
-    selectedId;
+    tableManager
 
     /**
      * @constructs EventManager
      */
-    constructor() {
-        this.selectedId = null;
+    constructor(tableManager) {
+        super();
+        this.tableManager = tableManager;
         this.initializeButtons();
     }
 
@@ -474,61 +420,6 @@ class EventManager {
     }
 
 
-
-    /**
-     * Apaga os eventos presentes na tabela, de forma a evitar duplicados
-     * e adiciona todos os eventos presentes na lista de eventos.
-     * 
-     * @returns 
-     */
-    updateEvents() {
-        // Retorna o primeiro elemento com tag 'tbody'
-        const tbody = document.getElementsByTagName("tbody")[0];
-        if (!tbody) {
-            return;
-        }
-
-        // Apagar o body da tabela para evitar duplicados
-        tbody.replaceChildren();
-
-        // Criar uma linha na tabela para cada evento
-        EventManager.eventList.forEach(event => {
-            const row = this.#addTableRow(event);
-
-            row.addEventListener("click", () => {
-                this.selectEventFromTable(tbody, row);
-            })
-
-            tbody.appendChild(row);
-        });
-    }
-
-    /**
-     * Cria uma nova linha na tabela e adiciona-lhe os valores de um evento.
-     * 
-     * @param {Events} event - o evento a adicionar na nova linha
-     * @returns uma linha ('tr') com os valores do evento
-     */
-    #addTableRow(event) {
-        let result = document.createElement('tr');
-
-        // Array para iterar sobre cada parâmetro
-        const eventValues = [
-            event.id,
-            event.type.description || event.type,
-            event.description,
-            this.dateToString(event.date)
-        ]
-
-        // Adicionar uma coluna na tabela para cada parâmetro no evento
-        eventValues.forEach(parameter => {
-            const td = document.createElement('td');
-            td.textContent = parameter;
-            result.appendChild(td);
-        });
-
-        return result;
-    }
 
     /**
      * 
@@ -582,7 +473,7 @@ class EventManager {
         }
     
         this.closeModal();
-        this.updateEvents();
+        this.tableManager.updateTable(EventManager, EventManager.eventList);
     }
 
     /**
@@ -661,29 +552,6 @@ class EventManager {
     }
 
     /**
-     * Seleciona um evento da tabela via on-click.
-     * 
-     * @param {HTMLElement} tbody - O elemento html do corpo da tabela de eventos
-     * @param {HTMLTableRowElement} row - A linha em que o evento a selecionar se encontra
-     * @returns 
-     */
-    selectEventFromTable(tbody, row) {
-        if (!tbody) {
-            return;
-        }
-
-        // Apaga o último evento selecionado
-        tbody.querySelectorAll("tr").forEach(r => r.classList.remove("selected"));
-
-        row.classList.add("selected");
-
-        const cells = row.querySelectorAll("td");
-        if (cells.length > 0) {
-            this.selectedID = parseInt(cells[0].textContent, 10);
-        }
-    }
-
-    /**
      * Edita o evento selecionado.
      * 
      * @returns 
@@ -713,7 +581,7 @@ class EventManager {
         if (confirmed) {
             this.deleteEvent(this.selectedID);
             this.selectedID = null;
-            this.updateEvents();
+            this.tableManager.updateTable(EventManager, EventManager.eventList);
         }
     }
 }
@@ -725,7 +593,7 @@ class EventManager {
  * 
  * @class Gestor de Membros (criar, editar, apagar)
  */
-class MemberManager {
+class MemberManager extends ElementManager {
 
     /**
      * @property {Member[]} memberList - Lista dos membros disponíveis
@@ -740,15 +608,16 @@ class MemberManager {
     static currentId = 1;
 
     /**
-     * @property {number} selectedId - Id selecionado na tabela
+     * @property {TableManager} tableManager - Gestor da tabela
      */
-    selectedId;
+    tableManager;
 
     /**
      * @constructs MemberManager
      */
-    constructor() {
-        this.selectedID = null;
+    constructor(tableManager) {
+        super();
+        this.tableManager = tableManager;
         this.init();
     }
 
@@ -759,17 +628,17 @@ class MemberManager {
      */
     init() {
         this.createButtons();
-        this.updateMemberTable();
+        this.tableManager.updateTable(MemberManager, MemberManager.memberList);
     }
 
     /**
      * Cria um novo membro.
      * 
-     * @param {string} name - O nome do membro a criar
+     * @param {string} description - O nome do membro a criar
      * @param {EventType[] | string[]} favoriteEventTypes - Os tipos de eventos preferidos do membro a criar
      */
-    createMember(name, favoriteEventTypes = []) {
-        const newMember = new Member(MemberManager.currentId, name);
+    createMember(description, favoriteEventTypes = []) {
+        const newMember = new Member(MemberManager.currentId, description);
         newMember.favoriteEventTypes = favoriteEventTypes;
         MemberManager.memberList.push(newMember);
         MemberManager.currentId++;
@@ -779,13 +648,13 @@ class MemberManager {
      * Edita um membro do clube a partir de um id.
      * 
      * @param {number} id - O id do membro a editar
-     * @param {string} newName - O novo nome do membro
+     * @param {string} newdescription - O novo nome do membro
      * @param {EventType[] | string[]} newFavoriteEventTypes - Os novos tipos de eventos preferidos do membro a editar
      */
-    editMember(id, newName, newFavoriteEventTypes = []) {
+    editMember(id, newdescription, newFavoriteEventTypes = []) {
         const member = MemberManager.memberList.find(m => m.id === id);
         if(member) {
-            member.name = newName;
+            member.description = newdescription;
             member.favoriteEventTypes = newFavoriteEventTypes;
         }
     }
@@ -839,16 +708,16 @@ class MemberManager {
         modal.classList.remove("hidden");
 
         const id = document.getElementById("memberId");
-        const name = document.getElementById("memberName");
+        const description = document.getElementById("memberName");
         const favTypes = document.getElementById("memberFavoriteEventTypes");
 
         if (member) {
             id.value = member.id;
-            name.value = member.name;
+            description.value = member.description;
             favTypes.value = member.favoriteEventTypes.map(e => e.description).join(", ");
         } else {
             id.value = MemberManager.currentId;
-            name.value = "";
+            description.value = "";
             favTypes.value = "";
         }
     }
@@ -875,13 +744,13 @@ class MemberManager {
      * @returns 
      */
     saveMember() {
-        let name = document.getElementById("memberName");
-        if (!name) {
+        let description = document.getElementById("memberName");
+        if (!description) {
             alert("Insira um nome válido");
             return;
         }
 
-        name = name.value.trim();
+        description = description.value.trim();
 
         let favoriteEventTypes = document.getElementById("memberFavoriteEventTypes");
         if (favoriteEventTypes && EventTypeManager.typeList) {
@@ -898,36 +767,13 @@ class MemberManager {
         const id = parseInt(memberId.value, 10); 
     
         if (MemberManager.memberList.some(m => m.id === id)) {
-            this.editMember(id, name, favoriteEventTypes);
+            this.editMember(id, description, favoriteEventTypes);
         } else {
-            this.createMember(name, favoriteEventTypes);
+            this.createMember(description, favoriteEventTypes);
         }
     
         this.closeModal();
-        this.updateMemberTable();
-    }
-
-    /**
-     * Seleciona um membro da tabela via on-click.
-     * 
-     * @param {HTMLElement} tbody - O elemento html do corpo da tabela de membros
-     * @param {HTMLTableRowElement} row - A linha em que o membro a selecionar se encontra
-     * @returns 
-     */
-    selectMemberFromTable(tbody, row) {
-        if (!tbody) {
-            return;
-        }
-
-        // Apaga o último selecionado
-        tbody.querySelectorAll("tr").forEach(r => r.classList.remove("selected"));
-
-        row.classList.add("selected");
-
-        const cells = row.querySelectorAll("td");
-        if (cells.length > 0) {
-            this.selectedID = parseInt(cells[0].textContent, 10);
-        }
+        this.tableManager.updateTable(MemberManager, MemberManager.memberList);
     }
 
     /**
@@ -936,7 +782,7 @@ class MemberManager {
      * @returns 
      */
     editSelectedMember() {
-        if (this.selectedID === void 0) {
+        if (this.selectedID === null) {
             alert("Selecione um membro.");
             return;
         }
@@ -951,7 +797,7 @@ class MemberManager {
      * @returns 
      */
     deleteSelectedMember() {
-        if (this.selectedID === void 0) {
+        if (this.selectedID === null) {
             alert("Selecione um membro.");
             return;
         }
@@ -960,62 +806,176 @@ class MemberManager {
         if (confirmed) {
             this.deleteMember(this.selectedID);
             this.selectedID = null;
-            this.updateMemberTable();
+            this.tableManager.updateTable(MemberManager, MemberManager.memberList);
         }
-    }
-
-    /**
-     * Atualiza a tabela de membros com os membros da lista.
-     * 
-     * @returns 
-     */
-    updateMemberTable() {
-        const tableBody = document.getElementById("memberTableBody");
-        if (!tableBody) {
-            return;
-        }
-
-        tableBody.replaceChildren();  // Limpa a tabela antes de atualizar
-    
-        MemberManager.memberList.forEach(member => {
-            const row = document.createElement("tr");
-            row.setAttribute("data-id", member.id);
-
-            const idCell = document.createElement("td");
-            idCell.textContent = member.id;
-            row.appendChild(idCell);
-
-            const nameCell = document.createElement("td");
-            nameCell.textContent = member.name;
-            row.appendChild(nameCell);
-
-            row.addEventListener("click", () => {
-                this.selectMemberFromTable(tableBody, row);
-            });
-
-            tableBody.appendChild(row);
-        });
     }
 }
 
 
 
 /**
+ * 
+ */
+class TableManager {
+    /**
+     * @property {ElementManager} elemType - Tipo dos elementos a mostrar na tabela
+     */
+    elemType;
+
+    /**
+     * @property {Array} elemList - Lista dos elementos a mostrar na tabela
+     */
+    elemList;
+
+    /**
+     * @property {number} selectedId - Id selecionado na tabela
+     */
+    selectedID;
+
+    constructor() {
+        this.elemType = null;
+        this.elemList = [];
+        this.selectedID = -1;
+    }
+
+    /**
+     * Retorna o corpo da tabela de acordo com o tipo de elemento.
+     * 
+     * @returns o corpo da tabela
+     */
+    getTableBody() {
+        let tbody;
+
+        switch(this.elemType) {
+            case EventTypeManager:
+                tbody = document.getElementById("event-type-body");
+                break;
+            case EventManager:
+                tbody = document.getElementById("event-body");
+                break;
+            case MemberManager:
+                tbody = document.getElementById("member-body");
+                break;
+        }
+
+        return tbody;
+    }
+
+    /**
+     * Atualiza a tabela para mostar a versão mais atualizada
+     * 
+     * @param {ElementManager} type 
+     * @param {Array} list 
+     * @returns 
+     */
+    updateTable(type, list) {
+        if (type == null || list == null) {return;}
+
+        this.elemType = type;
+        this.elemList = list;
+
+        const tbody = this.getTableBody();
+        if (!tbody) {return;}
+
+        tbody.replaceChildren()  // Limpa a tabela antes de atualizar
+        this.selectedID = -1;
+
+        this.elemList.forEach(elem => {
+            const row = this.#addTableRow(elem);
+
+            tbody.appendChild(row);
+        });
+    }
+
+    /**
+     * Cria e retorna uma linha de tabela com os valores de um elemento.
+     * 
+     * @param element - o elemento para a nova linha da tabela
+     * @returns uma nova linha para a tabela
+     */
+    #addTableRow(element) {
+        let result = document.createElement('tr');
+
+        // Array para iterar sobre cada parâmetro
+        let elementValues;
+
+        element instanceof Events ?
+            elementValues = [element.id, element.type, element.description, element.date] :
+            elementValues = [element.id, element.description];
+
+        // Adicionar uma coluna na tabela para cada parâmetro do elemento
+        elementValues.forEach(parameter => {
+            const td = document.createElement('td');
+            td.textContent = parameter;
+            result.appendChild(td);
+        });
+
+        // Ação on-click para selecionar elemento
+        result.addEventListener("click", () => {
+            this.selectElement(result);
+        });
+
+        return result;
+    }
+
+    /**
+     * Seleciona um elemento da tabela, coloca-o a BOLD e guarda o seu Id.
+     * 
+     * @param {HTMLTableRowElement} row - Linha da tabela para selecionar
+     * @returns
+     */
+    selectElement(row) {
+        const tbody = this.getTableBody();
+        if (!tbody) {return;}
+
+        // Apaga o último selecionado
+        tbody.querySelectorAll("tr").forEach(r => r.classList.remove("selected"));
+
+        row.classList.add("selected");
+
+        const cells = row.querySelectorAll("td");
+        if (cells.length > 0) {
+            this.selectedID = parseInt(cells[0].textContent, 10);
+        }
+    }
+
+    getSelectedElementID() {
+        return this.selectedID;
+    }
+}
+
+
+// Gestor de Tabelas
+const tableManager = new TableManager();
+
+/**
+ * Função para alternar entre páginas
+ */
+function navigateTo(pageId) {
+    document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
+    const page = document.getElementById(pageId);
+    if (page) {
+        page.classList.remove('hidden');
+    }
+    
+    switch(pageId) {
+        case "EventType":
+            tableManager.updateTable(EventTypeManager, EventTypeManager.typeList);
+            break;
+        case "Events":
+            tableManager.updateTable(EventManager, EventManager.eventList);
+            break;
+        case "Members":
+            tableManager.updateTable(MemberManager, MemberManager.memberList);
+            break;
+    }
+}
+
+/**
  * Função chamada quando a página é carregada
  */
 window.onload = function () {
-    const eventTypeManager = new EventTypeManager();
-    const eventManager = new EventManager();
-    const memberManager = new MemberManager();
-
-    const pageActions = {
-        "EventType": () => eventTypeManager.updateEventTypeTable(),
-        "Events": () => eventManager.updateEvents(),
-        "Members": () => memberManager.updateMemberTable()
-    };
-
-    const action = pageActions[document.body.id];
-    if(action) {
-        action();
-    }
+    const eventTypeManager = new EventTypeManager(tableManager);
+    const eventManager = new EventManager(tableManager);
+    const memberManager = new MemberManager(tableManager);
 }

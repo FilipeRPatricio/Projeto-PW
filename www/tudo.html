@@ -1,141 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESTSBike - SPA</title>
-    <link rel="stylesheet" href="styles/styles.css" />
-    <script defer src="scripts/scripts.js"></script>
-    <style>
-        .hidden { display: none; }
-        .active { display: block; }
-    </style>
-</head>
-<body>
-    
-    <h1 class="name">ESTSBike - Clube de Ciclismo</h1>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>ESTSBike - Ciclismo</title>
+        <link rel="stylesheet" href="styles/styles.css" />
+        <script defer src="scripts/scripts.js"></script>
+        <style>
+            .hidden { display: none; }
+            .active { display: block; }
+        </style>
+    </head>
+    <body>
+        
+        <h1 class="name">ESTSBike - Clube de Ciclismo</h1>
 
-    
-    <div class="navigator-bar">
-        <button class="area-link" onclick="navigateTo('Events')">Eventos</button>
-        <button class="area-link" onclick="navigateTo('EventType')">Tipos de Eventos</button>
-        <button class="area-link" onclick="navigateTo('Members')">Membros</button>
-    </div>
+        
+        <div class="navigator-bar">
+            <button class="area-link" onclick="navigateTo('Events')">Eventos</button>
+            <button class="area-link" onclick="navigateTo('EventType')">Tipos de Eventos</button>
+            <button class="area-link" onclick="navigateTo('Members')">Membros</button>
+        </div>
 
-    <!-- Secção: Eventos -->
-    <div id="Events" class="page hidden">
-        <h1 class="page-title">Eventos</h1>
-        <div id="event-modal" class="event">
-            <div class="modal-content">
-                <h2 id="modal-title" class="h2">Criar Evento</h2>
-                <form id="event-form">
-                    <label for="event-id">ID:</label>
-                    <input style="font-size: 20px; border: none; background: none; padding:0; margin:0;" type="number" id="event-id" readonly />
-                    <br />
-                    <label for="event-type">Tipo:</label>
-                    <input type="text" id="event-type" required />
-                    <br />
-                    <label for="event-description">Descritivo:</label>
-                    <input type="text" id="event-description" required />
-                    <br />
-                    <label for="event-date">Data:</label>
-                    <input type="date" id="event-date" required />
-                    <div class="modal-actions">
-                        <button type="button" id="save-event" class="action-button">Gravar</button>
-                        <button type="button" id="cancel-event" class="action-button">Cancelar</button>
-                    </div>
-                </form>
+        <!-- Secção: Eventos -->
+        <div id="Events" class="page hidden">
+            <h1 class="page-title">Eventos</h1>
+
+            <table id="event-table" class="member-table">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Tipo</th>
+                        <th>Descritivo</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody id="event-body">
+                    <!-- Dados preenchidos dinamicamente -->
+                </tbody>
+            </table>
+            
+            <div id="event-modal" class="event">
+                <div class="modal-content">
+                    <h2 id="modal-title" class="h2">Criar Evento</h2>
+
+                    <form id="event-form">
+                        <label for="event-id">ID:</label>
+                        <input style="font-size: 20px; border: none; background: none; padding:0; margin:0;" type="number" id="event-id" readonly/>
+                        <br>
+                        <label for="event-type">Tipo:</label>
+                        <input type="text" id="event-type" required/>
+                        <br>
+                        <label for="event-description">Descritivo:</label>
+                        <input type="text" id="event-description" required/>
+                        <br>
+                        <label for="event-date">Data:</label>
+                        <input type="date" id="event-date" required/>
+
+                        <div class="modal-actions">
+                            <button type="button" id="save-event" class="action-button">Gravar</button>
+                            <button type="button" id="cancel-event" class="action-button">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Secção: Tipos de Eventos -->
-    <div id="EventType" class="page hidden">
-        <h1 class="page-title">Tipos de Eventos</h1>
-        <table id="event-type-table" class="member-table">
-            <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Descritivo</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Dados preenchidos dinamicamente -->
-            </tbody>
-        </table>
-        <div class="button-container">
-            <button id="type-create" class="action-button">Criar</button>
-            <button id="type-edit" class="action-button">Editar</button>
-            <button id="type-delete" class="action-button">Apagar</button>
-        </div>
-        <!-- Modal de Criação de Tipos de Eventos -->
-        <div id="createEventTypeModal" class="modal hidden">
-            <div class="modal-content">
-                <h2>Criar um novo tipo de evento</h2>
-                <form id="createEventTypeForm">
-                    <label for="eventTypeId">ID:</label>
-                    <input style="font-size: 20px; border: none; background: none; padding: 0; margin:0;" type="number" id="eventTypeId" readonly><br><br>
-                    <label for="eventTypeDescription">Descritivo:</label>
-                    <input type="text" id="eventTypeDescription" required><br><br>
-                    <div class="modal-actions">
-                        <button type="button" id="saveEventType" class="action-button">Criar</button>
-                        <button type="button" id="cancelEventType" class="action-button">Cancelar</button>
-                    </div>
-                </form>
+
+
+        <!-- Secção: Tipos de Eventos -->
+        <div id="EventType" class="page hidden">
+            <h1 class="page-title">Tipos de Eventos</h1>
+
+            <table id="event-type-table" class="member-table">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Descritivo</th>
+                    </tr>
+                </thead>
+                <tbody id="event-type-body">
+                    <!-- Dados preenchidos dinamicamente -->
+                </tbody>
+            </table>
+
+            <div class="button-container">
+                <button id="type-create" class="action-button">Criar</button>
+                <button id="type-edit" class="action-button">Editar</button>
+                <button id="type-delete" class="action-button">Apagar</button>
+            </div>
+
+            <!-- Modal de Criação de Tipos de Eventos -->
+            <div id="createEventTypeModal" class="modal hidden">
+                <div class="modal-content">
+                    <h2>Criar um novo tipo de evento</h2>
+
+                    <form id="createEventTypeForm">
+                        <label for="eventTypeId">ID:</label>
+                        <input style="font-size: 20px; border: none; background: none; padding: 0; margin:0;" type="number" id="eventTypeId" readonly>
+                        <br><br>
+                        <label for="eventTypeDescription">Descritivo:</label>
+                        <input type="text" id="eventTypeDescription" required>
+                        <br><br>
+
+                        <div class="modal-actions">
+                            <button type="button" id="saveEventType" class="action-button">Criar</button>
+                            <button type="button" id="cancelEventType" class="action-button">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Secção: Membros -->
-    <div id="Members" class="page hidden">
-        <h1 class="page-title">Membros</h1>
-        <table id="member-table" class="member-table">
-            <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Nome</th>
-                </tr>
-            </thead>
-            <tbody id="memberTableBody">
-                <!-- Dados preenchidos dinamicamente -->
-            </tbody>
-        </table>
-        <div class="button-container">
-            <button id="member-create" class="action-button">Criar</button>
-            <button id="member-edit" class="action-button">Editar</button>
-            <button id="member-delete" class="action-button">Apagar</button>
-        </div>
-        <!-- Modal de Criação de Membros -->
-        <div id="createMemberModal" class="modal hidden">
-            <div class="modal-content">
-                <h2 id="modal-title" class="h2">Criar Membro</h2>
-                <form id="memberForm">
-                    <label for="memberId">ID:</label>
-                    <input style="font-size: 20px; border: none; background: none; padding:0; margin:0;" type="number" id="memberId" readonly><br>
-                    <label for="memberName">Nome:</label>
-                    <input type="text" id="memberName" placeholder="Nome do membro" required /><br>
-                    <label for="memberFavoriteEventTypes">Tipos de Eventos Preferidos:</label>
-                    <input type="text" id="memberFavoriteEventTypes" placeholder="Separados por vírgulas" />
-                    <div class="modal-actions">
-                        <button type="button" id="saveMember" class="action-button">Gravar</button>
-                        <button type="button" id="cancelMember" class="action-button">Cancelar</button>
-                    </div>
-                </form>
+
+
+        <!-- Secção: Membros -->
+        <div id="Members" class="page hidden">
+            <h1 class="page-title">Membros</h1>
+
+            <table id="member-table" class="member-table">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Nome</th>
+                    </tr>
+                </thead>
+                <tbody id="member-body">
+                    <!-- Dados preenchidos dinamicamente -->
+                </tbody>
+            </table>
+
+            <div class="button-container">
+                <button id="member-create" class="action-button">Criar</button>
+                <button id="member-edit" class="action-button">Editar</button>
+                <button id="member-delete" class="action-button">Apagar</button>
+            </div>
+
+            <!-- Modal de Criação de Membros -->
+            <div id="createMemberModal" class="modal hidden">
+                <div class="modal-content">
+                    <h2 id="modal-title" class="h2">Criar Membro</h2>
+
+                    <form id="memberForm">
+                        <label for="memberId">ID:</label>
+                        <input style="font-size: 20px; border: none; background: none; padding:0; margin:0;" type="number" id="memberId" readonly>
+                        <br>
+                        <label for="memberName">Nome:</label>
+                        <input type="text" id="memberName" placeholder="Nome do membro" required />
+                        <br>
+                        <label for="memberFavoriteEventTypes">Tipos de Eventos Preferidos:</label>
+                        <input type="text" id="memberFavoriteEventTypes" placeholder="Separados por vírgulas" />
+
+                        <div class="modal-actions">
+                            <button type="button" id="saveMember" class="action-button">Gravar</button>
+                            <button type="button" id="cancelMember" class="action-button">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
+    </body>
 
     <!-- Rodapé -->
     <footer>
         <a class="about-link" href="about.html">About &copy; Tecnologia Setúbal &bull; Programação Web</a>
     </footer>
-
-    <script>
-        // Função para alternar entre páginas
-        function navigateTo(pageId) {
-            document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
-            document.getElementById(pageId).classList.remove('hidden');
-        }
-    </script>
-</body>
 </html>
