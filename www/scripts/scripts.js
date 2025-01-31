@@ -142,16 +142,10 @@ class EventTypeManager extends ElementManager {
     static currentId = 1;
 
     /**
-     * @property {TableManager} tableManager - Gestor de tabelas
-     */
-    tableManager;
-
-    /**
      * @constructs EventTypeManager
      */
-    constructor(tableManager) {
+    constructor() {
         super();
-        this.tableManager = tableManager;
         this.createButtons();
     }
 
@@ -249,7 +243,7 @@ class EventTypeManager extends ElementManager {
                 document.getElementById("createEventTypeModal").classList.add("hidden");
                 descriptionInput.value = "";
 
-                this.tableManager.updateTable(EventTypeManager, EventTypeManager.typeList);
+                tableManager.updateTable(EventTypeManager, EventTypeManager.typeList);
                 
             });
         }
@@ -336,7 +330,7 @@ class EventTypeManager extends ElementManager {
                 if(confirmed){
                     EventTypeManager.typeList = EventTypeManager.typeList.filter(type => type.id !== this.selectedID);
                     this.selectedID = null;
-                    this.tableManager.updateTable(EventTypeManager, EventTypeManager.typeList);
+                    tableManager.updateTable(EventTypeManager, EventTypeManager.typeList);
                 }
             });
         }
@@ -364,16 +358,10 @@ class EventManager extends ElementManager {
     static currentId = 1;
 
     /**
-     * @property {TableManager} tableManager - Gestor da tabela
-     */
-    tableManager
-
-    /**
      * @constructs EventManager
      */
-    constructor(tableManager) {
+    constructor() {
         super();
-        this.tableManager = tableManager;
         this.initializeButtons();
     }
 
@@ -473,7 +461,7 @@ class EventManager extends ElementManager {
         }
     
         this.closeModal();
-        this.tableManager.updateTable(EventManager, EventManager.eventList);
+        tableManager.updateTable(EventManager, EventManager.eventList);
     }
 
     /**
@@ -581,7 +569,7 @@ class EventManager extends ElementManager {
         if (confirmed) {
             this.deleteEvent(this.selectedID);
             this.selectedID = null;
-            this.tableManager.updateTable(EventManager, EventManager.eventList);
+            tableManager.updateTable(EventManager, EventManager.eventList);
         }
     }
 }
@@ -608,16 +596,10 @@ class MemberManager extends ElementManager {
     static currentId = 1;
 
     /**
-     * @property {TableManager} tableManager - Gestor da tabela
-     */
-    tableManager;
-
-    /**
      * @constructs MemberManager
      */
-    constructor(tableManager) {
+    constructor() {
         super();
-        this.tableManager = tableManager;
         this.init();
     }
 
@@ -628,7 +610,7 @@ class MemberManager extends ElementManager {
      */
     init() {
         this.createButtons();
-        this.tableManager.updateTable(MemberManager, MemberManager.memberList);
+        tableManager.updateTable(MemberManager, MemberManager.memberList);
     }
 
     /**
@@ -773,7 +755,7 @@ class MemberManager extends ElementManager {
         }
     
         this.closeModal();
-        this.tableManager.updateTable(MemberManager, MemberManager.memberList);
+        tableManager.updateTable(MemberManager, MemberManager.memberList);
     }
 
     /**
@@ -806,7 +788,7 @@ class MemberManager extends ElementManager {
         if (confirmed) {
             this.deleteMember(this.selectedID);
             this.selectedID = null;
-            this.tableManager.updateTable(MemberManager, MemberManager.memberList);
+            tableManager.updateTable(MemberManager, MemberManager.memberList);
         }
     }
 }
@@ -945,6 +927,7 @@ class TableManager {
 }
 
 
+
 // Gestor de Tabelas
 const tableManager = new TableManager();
 
@@ -975,7 +958,7 @@ function navigateTo(pageId) {
  * Função chamada quando a página é carregada
  */
 window.onload = function () {
-    const eventTypeManager = new EventTypeManager(tableManager);
-    const eventManager = new EventManager(tableManager);
-    const memberManager = new MemberManager(tableManager);
+    const eventTypeManager = new EventTypeManager();
+    const eventManager = new EventManager();
+    const memberManager = new MemberManager();
 }
