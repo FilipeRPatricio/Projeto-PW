@@ -6,23 +6,21 @@
         <title>ESTSBike - Ciclismo</title>
         <link rel="stylesheet" href="styles/styles.css" />
         <script defer src="scripts/scripts.js"></script>
-        <style>
-            .hidden { display: none; }
-            .active { display: block; }
-        </style>
     </head>
     <body>
         
         <h1 class="name">ESTSBike - Clube de Ciclismo</h1>
 
-        
         <div class="navigator-bar">
             <button class="area-link" onclick="navigateTo('Events')">Eventos</button>
             <button class="area-link" onclick="navigateTo('EventType')">Tipos de Eventos</button>
             <button class="area-link" onclick="navigateTo('Members')">Membros</button>
         </div>
 
+
+
         <!-- Secção: Eventos -->
+
         <div id="Events" class="page">
             <h1 class="page-title">Eventos</h1>
 
@@ -76,6 +74,7 @@
 
 
         <!-- Secção: Tipos de Eventos -->
+
         <div id="EventType" class="page hidden">
             <h1 class="page-title">Tipos de Eventos</h1>
 
@@ -123,6 +122,7 @@
 
 
         <!-- Secção: Membros -->
+
         <div id="Members" class="page hidden">
             <h1 class="page-title">Membros</h1>
 
@@ -146,23 +146,37 @@
             </div>
 
             <!-- Modal de Criação de Membros -->
-            <div id="createMemberModal" class="modal hidden">
+            <div id="create-member-modal" class="modal hidden">
                 <div class="modal-content">
                     <h2 id="modal-title" class="h2">Criar Membro</h2>
 
-                    <form id="memberForm">
-                        <label for="memberId">ID:</label>
-                        <input style="font-size: 20px; border: none; background: none; padding:0; margin:0;" type="number" id="memberId" readonly>
+                    <form id="member-form">
+                        <label for="member-id">ID:</label>
+                        <input style="font-size: 20px; border: none; background: none; padding:0; margin:0;" type="number" id="member-id" readonly>
                         <br>
-                        <label for="memberName">Nome:</label>
-                        <input type="text" id="memberName" placeholder="Nome do membro" required />
+                        <label for="member-name">Nome:</label>
+                        <input type="text" id="member-name" placeholder="Nome do membro" required/>
                         <br>
-                        <label for="memberFavoriteEventTypes">Tipos de Eventos Preferidos:</label>
-                        <input type="text" id="memberFavoriteEventTypes" placeholder="Separados por vírgulas" />
+
+                        <label>Tipos de Eventos Preferidos:</label>
+
+                        <div id="member-favorite-event-types">
+                            <!-- <input type="checkbox" id="BTT" name="BTT" value="1">
+                            <label for="BTT"> BTT </label><br>
+                            <input type="checkbox" id="Track" name="Track" value="2">
+                            <label for="Track"> Track </label><br>
+                            <input type="checkbox" id="BMX" name="BMX" value="3">
+                            <label for="BMX"> BMX </label><br> -->
+                        </div>
 
                         <div class="modal-actions">
                             <button type="button" id="saveMember" class="action-button">Gravar</button>
                             <button type="button" id="cancelMember" class="action-button">Cancelar</button>
+                        </div>
+
+                        <div class="modal-actions hidden" id="modal-register">
+                            <button type="button" id="register-event" class="action-button">Inscrever</button>
+                            <button type="button" id="unregister-event" class="action-button">Desinscrever</button>
                         </div>
                     </form>
                 </div>

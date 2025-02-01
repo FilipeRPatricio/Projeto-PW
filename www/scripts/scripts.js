@@ -1,6 +1,11 @@
 "use strict";
 
-
+/*
+    TODO: Drop-down list de tipos de eventos ao criar evento;
+    TODO: Inscrever e Desinscrever membro num evento.
+    TODO: Mudar forma como os alerts são mostrados para diminuir o nº de clicks
+    TODO: Verificações extra: i.e. datas que já passaram, tipos de eventos que já existem
+*/
 
 /**
  * Classe EventType
@@ -111,6 +116,28 @@ class Member {
     constructor(id, description) {
         this.id = id;
         this.description = description;
+        this.favoriteEventTypes = [];
+        this.registeredEvents = [];
+    }
+
+    /**
+     * Verifica se um membro tem um tipo de evento como favorito.
+     * 
+     * @param {number} type - O id do tipo de evento a procurar
+     * @returns true se tiver como favorito o tipo de evento, false caso não tenha
+     */
+    likesThisEventType(type) {
+        return !!this.favoriteEventTypes.find(t => t.id === type);
+    }
+
+    /**
+     * Verifica se um membro está registado no evento recebido.
+     * 
+     * @param {number} event - O id do evento a verificar
+     * @returns true se estiver inscrito, false caso não esteja
+     */
+    isRegisteredInEvent(event) {
+        return !!this.registeredEvents.find(e => e.id === event);
     }
 }
 
@@ -195,7 +222,6 @@ class EventTypeManager extends ElementManager {
     createType(description){
         const newType = new EventType(EventTypeManager.currentId++, description);
         EventTypeManager.typeList.push(newType);
-        return newType;
     }
     
     /**
@@ -345,13 +371,42 @@ class EventTypeManager extends ElementManager {
                 }
 
                 const confirmed = confirm("Tem a certeza que deseja apagar este tipo de evento?");
-                
-                if(confirmed){
-                    EventTypeManager.typeList = EventTypeManager.typeList.filter(type => type.id !== selectedID);
-                    tableManager.updateTable(EventTypeManager, EventTypeManager.typeList);
+                if (!confirmed) {return;}
+
+                if (EventManager.hasEventWithType(selectedID)) {
+                    alert("Não pode apagar o Tipo de Evento, pois é utilizado num Evento!");
+                    return;
                 }
+
+                if (MemberManager.hasMemberWithFavorite(selectedID)) {
+                    alert("Não pode apagar o Tipo de Evento, pois é o favorito de um Membro!");
+                    return;
+                }
+
+                EventTypeManager.typeList = EventTypeManager.typeList.filter(type => type.id !== selectedID);
+                tableManager.updateTable(EventTypeManager, EventTypeManager.typeList);
             });
         }
+    }
+
+    /**
+     * Retorna o Tipo de Evento encontrado com o id recebido.
+     * 
+     * @param {number} id - O id a procurar
+     * @returns EventType com o id ou undefined caso não exista
+     */
+    static getTypeById(id) {
+        return EventTypeManager.typeList.find(t => t.id === id);
+    }
+
+    /**
+     * Retorna o Tipo de Evento encontrado com a descrição recebida.
+     * 
+     * @param {string} description - A descrição a procurar
+     * @returns EventType com a descrição ou undefined caso não exista
+     */
+    static getTypeByDescription(description) {
+        return EventTypeManager.typeList.find(t => t.description === description);
     }
 }
 
@@ -429,41 +484,35 @@ class EventManager extends ElementManager {
         });
 
         this.editButton.addEventListener("click", () => {
-            this.editSelectedMember();
+            this.editSelectedEvent();
         });
 
         this.deleteButton.addEventListener("click", () => {
-            this.deleteSelectedMember();
+            this.deleteSelectedEvent();
         });
-    }
-
-    /**
-     * Retorna uma data em string no formato 'DD-MM-YYYY'.
-     * 
-     * @param {Date | string} date 
-     * @returns 
-     */
-    dateToString(date) {
-        if (!(date instanceof Date)) {
-            date = new Date(date);
-        }
-
-        let result = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
-        return result;
     }
 
     /**
      * Cria um novo evento e adiciona-o à lista.
+     * 
+     * @param {EventType} type - O tipo do evento
+     * @param {string} description - A descrição do evento
+     * @param {Date | string} date - A data do evento
+     * @returns 
      */
     createEvent(type, description, date) {
         // Encontra o tipo de evento com a mesma descrição
         const eventType = EventTypeManager.typeList.find(t => t.description === type);
-        if (!(eventType instanceof EventType)) {
+        if (!eventType) {
             alert("Tipo de evento não encontrado.")
             return;
         }
-        
-        EventManager.eventList.push(new Events(EventManager.currentId++, type, description, date));
+
+        if (!(date instanceof Date)) {
+            date = new Date(date);
+        }
+
+        EventManager.eventList.push(new Events(EventManager.currentId++, eventType, description, date));
     }
 
     /**
@@ -508,9 +557,7 @@ class EventManager extends ElementManager {
      */
     editEvent(id, type, description, date) {
         const event = EventManager.eventList.find(ev => ev.id === id);
-        if(event) {
-
-
+        if (event) {
             event.type = type;
             event.description = description;
             event.date = date;
@@ -550,7 +597,7 @@ class EventManager extends ElementManager {
             id.value = event.id;
             type.value = event.type.description || event.type;
             description.value = event.description;
-            date.value = event.date;
+            date.value = dateToString(event.date);
         } else {
             id.value = EventManager.currentId;
         }
@@ -578,7 +625,7 @@ class EventManager extends ElementManager {
      * 
      * @returns 
      */
-    editSelectedMember() {
+    editSelectedEvent() {
         const selectedID = tableManager.getSelectedElementID();
         if (selectedID < 0) {
             alert("Selecione um membro.");
@@ -594,7 +641,7 @@ class EventManager extends ElementManager {
      * 
      * @returns 
      */
-    deleteSelectedMember() {
+    deleteSelectedEvent() {
         const selectedID = tableManager.getSelectedElementID();
         if (selectedID < 0) {
             alert("Selecione um evento.");
@@ -602,10 +649,30 @@ class EventManager extends ElementManager {
         }
 
         const confirmed = confirm("Deseja mesmo apagar este evento?");
-        if (confirmed) {
-            this.deleteEvent(selectedID);
-            tableManager.updateTable(EventManager, EventManager.eventList);
+        if (!confirmed) {return;}
+
+        if (MemberManager.hasMemberInEvent(selectedID)) {
+            alert("Não pode apagar o Evento, pois tem Membros inscritos!");
+            return;
         }
+
+        this.deleteEvent(selectedID);
+        tableManager.updateTable(EventManager, EventManager.eventList);
+    }
+
+    // TODO: Rever
+    static getEventsWithTypes(...types) {
+        return EventManager.eventList.filter(e => types.includes(e.type));
+    }
+
+    /**
+     * Verifica se algum Evento é do Tipo recebido.
+     * 
+     * @param {number} typeId - O id do Tipo de Evento a procurar
+     * @returns true se existir pelo menos um Evento do Tipo recebido, false caso contrário
+     */
+    static hasEventWithType(typeId) {
+        return EventManager.eventList.some(e => e.type === EventTypeManager.getTypeById(typeId));
     }
 }
 
@@ -617,6 +684,11 @@ class EventManager extends ElementManager {
  * @class Gestor de Membros (criar, editar, apagar)
  */
 class MemberManager extends ElementManager {
+
+    /**
+     * @property {CheckboxManager} checkboxManager - Gestor de Checkboxes para a lista de Tipos favoritos
+     */
+    checkboxManager;
 
     /**
      * @property {Member[]} memberList - Lista dos membros disponíveis
@@ -632,9 +704,11 @@ class MemberManager extends ElementManager {
 
     /**
      * @constructs MemberManager
+     * @param {CheckboxManager} checkboxManager - O Gestor para as Checkboxes de Tipos de Eventos
      */
-    constructor() {
+    constructor(checkboxManager) {
         super();
+        this.checkboxManager = checkboxManager;
         this.init();
     }
 
@@ -662,11 +736,10 @@ class MemberManager extends ElementManager {
         // Filtra os tipos de eventos preferidos que são da classe EventType
         const validTypes = favoriteEventTypes.filter(type => type instanceof EventType);
 
-        const newMember = new Member(MemberManager.currentId, description);
+        const newMember = new Member(MemberManager.currentId++, description);
         newMember.favoriteEventTypes = validTypes;
 
         MemberManager.memberList.push(newMember);
-        MemberManager.currentId++;
     }
 
     /**
@@ -727,26 +800,31 @@ class MemberManager extends ElementManager {
      * @returns 
      */
     openModal(member = null) {
-        const modal = document.getElementById("createMemberModal");
+        const modal = document.getElementById("create-member-modal");
         if (!modal) {
             return;
         }
 
-        modal.classList.remove("hidden");
+        const id = document.getElementById("member-id");
+        const description = document.getElementById("member-name");
 
-        const id = document.getElementById("memberId");
-        const description = document.getElementById("memberName");
-        const favTypes = document.getElementById("memberFavoriteEventTypes");
+        if (!id || !description) return;
+
+        this.checkboxManager.updateCheckboxes(EventTypeManager.typeList);
 
         if (member) {
+            document.getElementById("modal-register")?.classList.remove("hidden");
+
             id.value = member.id;
             description.value = member.description;
-            favTypes.value = member.favoriteEventTypes.map(e => e.description).join(", ");
+            this.checkboxManager.checkFavoriteEventTypes(member.favoriteEventTypes);
+
         } else {
             id.value = MemberManager.currentId;
             description.value = "";
-            favTypes.value = "";
         }
+
+        modal.classList.remove("hidden");
     }
 
     /**
@@ -755,14 +833,10 @@ class MemberManager extends ElementManager {
      * @returns 
      */
     closeModal() {
-        const modal = document.getElementById("createMemberModal");
-        if (!modal) {
-            return;
-        }
-
-        modal.classList.add("hidden");
-        document.getElementById("memberName").value = "";
-        document.getElementById("memberFavoriteEventTypes").value = "";
+        document.getElementById("create-member-modal")?.classList.add("hidden");
+        document.getElementById("modal-register")?.classList.add("hidden");
+        document.getElementById("member-name").value = "";
+        this.checkboxManager.uncheckAllEventTypes();
     }
 
     /**
@@ -771,32 +845,33 @@ class MemberManager extends ElementManager {
      * @returns 
      */
     saveMember() {
-        let description = document.getElementById("memberName");
-        if (!description) {
+        let description = document.getElementById("member-name");
+        if (!description || description.value.trim() === "") {
             alert("Insira um nome válido");
             return;
         }
 
         description = description.value.trim();
 
-        let favoriteEventTypes = document.getElementById("memberFavoriteEventTypes");
-        if (favoriteEventTypes && EventTypeManager.typeList) {
-            favoriteEventTypes = favoriteEventTypes.value
-                .split(",")
-                .map(desc => EventTypeManager.typeList.find(type => type.description.trim() === desc.trim()))
-                .filter(type => type);
-        }
+        const checkedTypes = this.checkboxManager.getCheckedEventTypes();
+        const favoriteTypes = [];
+        checkedTypes.forEach(type => {
+            const typeId = EventTypeManager.getTypeById(type);
+            if (typeId !== void 0) {
+                favoriteTypes.push(typeId);
+            }
+        });
         
-        const memberId = document.getElementById("memberId");
+        const memberId = document.getElementById("member-id");
         if (!memberId) {
             return;
         }
         const id = parseInt(memberId.value, 10); 
     
         if (MemberManager.memberList.some(m => m.id === id)) {
-            this.editMember(id, description, favoriteEventTypes);
+            this.editMember(id, description, favoriteTypes);
         } else {
-            this.createMember(description, favoriteEventTypes);
+            this.createMember(description, favoriteTypes);
         }
     
         this.closeModal();
@@ -837,6 +912,136 @@ class MemberManager extends ElementManager {
             tableManager.updateTable(MemberManager, MemberManager.memberList);
         }
     }
+
+    /**
+     * Verifica se um dos membros geridos tem, como favorito, o tipo de evento recebido.
+     * 
+     * @param {number} type - O id do tipo de evento a procurar
+     */
+    static hasMemberWithFavorite(type) {
+        return MemberManager.memberList.some(m => m.likesThisEventType(type));
+    }
+
+    /**
+     * Verifica se um dos membros geridos está inscrito no evento recebido.
+     * 
+     * @param {number} event - O id do evento a procurar
+     */
+    static hasMemberInEvent(event) {
+        return MemberManager.memberList.some(m => m.isRegisteredInEvent(event));
+    }
+}
+
+
+
+/**
+ * Classe CheckboxManager
+ * 
+ * @class Gestor de Checkboxes para os Tipos de Eventos favoritos
+ */
+class CheckboxManager {
+
+    /**
+     * @property {HTMLElement} checkboxDiv - O Div onde as Checkboxes a gerir estão localizadas
+     */
+    checkboxDiv;
+
+    /**
+     * @constructs CheckboxManager
+     * @param {string} divId - O Id do Div onde as Checkboxes estão localizadas
+     */
+    constructor(divId) {
+        this.checkboxDiv = document.getElementById(divId);
+    }
+
+    /**
+    * Retorna um Array com todos os Elementos 'Checkbox' disponíveis.
+    * 
+    * @returns Um Array com Checkboxes
+    */
+    #getCheckboxes() {
+        return [...this.checkboxDiv.getElementsByTagName("input")] || [];
+    }
+
+    /**
+     * Retorna um Array com os Ids dos Tipos de Eventos selecionados nas Checkboxes.
+     * 
+     * @returns Um Array com os Ids dos Tipos de Eventos
+     */
+    getCheckedEventTypes() {
+        const types = [];
+        const checkboxes = this.#getCheckboxes();
+
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                types.push(parseInt(checkbox.value, 10));
+            }
+        });
+
+        return types;
+    }
+
+    /**
+     * Faz com que todas as checkboxes apareçam não selecionadas.
+     */
+    uncheckAllEventTypes() {
+        const checkboxes = this.#getCheckboxes();
+
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+    }
+
+    /**
+     * Seleciona as checkboxes que correspondem aos Tipos de Eventos na lista.
+     * 
+     * @param {EventType[]} typeList - A lista de Tipos de Eventos a selecionar
+     */
+    checkFavoriteEventTypes(typeList = []) {
+        const checkboxes = this.#getCheckboxes();
+
+        checkboxes.forEach(checkbox => {
+            const type = EventTypeManager.getTypeById(parseInt(checkbox.value, 10));
+
+            if (typeList.includes(type)) {
+                checkbox.checked = true;
+            }
+        });
+    }
+
+    /**
+     * Atualiza as Checkboxes.
+     * 
+     * @param {EventType[]} typeList - A lista de Tipos de Eventos para criar Checkboxes
+     */
+    updateCheckboxes(typeList) {
+        this.checkboxDiv.replaceChildren();
+
+        typeList.forEach(type => {
+            this.#createCheckbox(type);
+        });
+    }
+
+    /**
+     * Cria uma Checkbox com Label para um Tipo de Evento recebido.
+     * 
+     * @param {EventType} type - O Tipo de Evento
+     */
+    #createCheckbox(type) {
+        const input = document.createElement("input");
+        input.setAttribute("type", "checkbox");
+        input.id = type.description;
+        input.name = type.description;
+        input.value = type.id;
+
+        const label = document.createElement("label");
+        label.htmlFor = type.description;
+        label.textContent = type.description;
+
+        this.checkboxDiv.append(input);
+        this.checkboxDiv.append(label);
+        this.checkboxDiv.append(document.createElement("br"));
+    }
 }
 
 
@@ -862,6 +1067,9 @@ class TableManager {
      */
     selectedID;
 
+    /**
+     * @constructs TableManager
+     */
     constructor() {
         this.elemType = null;
         this.elemList = [];
@@ -930,7 +1138,7 @@ class TableManager {
         let elementValues;
 
         element instanceof Events ?
-            elementValues = [element.id, element.type, element.description, element.date] :
+            elementValues = [element.id, element.type.description, element.description, dateToString(element.date)] :
             elementValues = [element.id, element.description];
 
         // Adicionar uma coluna na tabela para cada parâmetro do elemento
@@ -981,6 +1189,8 @@ class TableManager {
 
 
 
+
+
 // Gestor de Tabelas
 const tableManager = new TableManager();
 
@@ -1008,10 +1218,27 @@ function navigateTo(pageId) {
 }
 
 /**
+* Retorna uma data em string no formato 'YYYY-MM-DD'.
+* 
+* @param {Date | string} date 
+* @returns 
+*/
+function dateToString(date) {
+   if (!(date instanceof Date)) {
+       date = new Date(date);
+   }
+
+   const day = date.getDate().toString().padStart(2, '0');
+   const month = (date.getMonth() + 1).toString().padStart(2, '0');
+
+   return `${date.getFullYear()}-${month}-${day}`;
+}
+
+/**
  * Função chamada quando a página é carregada
  */
 window.onload = function () {
     const eventTypeManager = new EventTypeManager();
     const eventManager = new EventManager();
-    const memberManager = new MemberManager();
+    const memberManager = new MemberManager(new CheckboxManager("member-favorite-event-types"));
 }

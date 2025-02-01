@@ -180,7 +180,7 @@ footer {
     border: 1px solid var(--root-primary-color);
 }
 
-/*EStilos para o display criar tipo de evento */
+/*Estilos do display para criar elementos */
 .modal {
     display: flex;
     justify-content: center;
@@ -211,6 +211,11 @@ footer {
     display: flex;
     justify-content: space-between;
     margin-top: var(--root-space);
+}
+
+#member-favorite-event-types {
+    overflow-y: scroll;
+    max-height: 100px;
 }
 
 /*Estilo para cada linha selecionada*/
