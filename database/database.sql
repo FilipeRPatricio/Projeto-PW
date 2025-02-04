@@ -1,6 +1,10 @@
 Create Database ESTSBike;
 Use ESTSBike;
 
+-- Utilizador
+Create User if not exists PW Identified by 'PW@123';
+Grant all on ESTSBike.* to PW;
+
 -- Tabela Tipo de Evento
 Create Table EventType (
 	ID int primary key auto_increment,
