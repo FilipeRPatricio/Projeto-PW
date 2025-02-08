@@ -223,3 +223,46 @@ tr.selected {
     background-color: rgb(169, 247, 44);
     font-weight: bold;
 }
+
+/* Estilo do about */
+
+
+.author{
+    background: white;
+    padding:15px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: inline-block;
+    margin-top: 20px;
+}
+
+.author-name {
+    display: block;
+    font-size: 18px;
+    margin-top: 5px;
+    color: #222;
+}
+
+.areas-back-link {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #000033;
+    color: #ccddff;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.areas-back-link:hover {
+    background-color: #0056b3;
+}
+
+.about-link {
+    text-decoration: none;
+    color: #ccddff;
+}
+
+.about-link:hover {
+    text-decoration: underline;
+}
