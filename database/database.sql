@@ -3,7 +3,7 @@ Use ESTSBike;
 
 -- Utilizador
 Create User if not exists PW Identified by 'PW@123';
-Grant all on ESTSBike.* to PW;
+Grant ALL PRIVILEGES on ESTSBike.* to PW;
 
 -- Tabela Tipo de Evento
 Create Table EventType (
@@ -63,7 +63,7 @@ Insert into Event (Type, Description, Date) values (2, "Classic", "2025-5-22");
 Insert into Event (Type, Description, Date) values (3, "Freestyle", "2025-2-13");
 
 Insert into Member (Description) values ("Tiago");
-Insert into Member (Description) values ("Felipe");
+Insert into Member (Description) values ("Filipe");
 Insert into Member (Description) values ("João");
 
 Insert into FavoriteType (Member, EventType) values (1, 1);
