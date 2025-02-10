@@ -10,7 +10,6 @@ export async function execute(command, parameters = []) {
     try {
         connection = await pool.getConnection();
         let [result] = await connection.execute(command, parameters);
-        console.log(result);
         return result;
     } catch (error) {
         console.error("erro ao executar query:", error);
@@ -28,4 +27,11 @@ export async function testConnection(){
         console.error("Erro ao conectar ao MySQL", error);
     }
 }
+
 testConnection();
+
+
+
+
+
+

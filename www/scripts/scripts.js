@@ -385,6 +385,7 @@ class EventTypeManager extends ElementManager {
 
                 EventTypeManager.typeList = EventTypeManager.typeList.filter(type => type.id !== selectedID);
                 tableManager.updateTable(EventTypeManager, EventTypeManager.typeList);
+
             });
         }
     }
@@ -487,7 +488,8 @@ class EventManager extends ElementManager {
             this.editSelectedEvent();
         });
 
-        this.deleteButton.addEventListener("click", () => {
+        this.deleteButton.addEventListener("click", (e) => {
+            e.preventDefault();
             this.deleteSelectedEvent();
         });
     }
@@ -641,7 +643,7 @@ class EventManager extends ElementManager {
      * 
      * @returns 
      */
-    deleteSelectedEvent() {
+    async deleteSelectedEvent() {
         const selectedID = tableManager.getSelectedElementID();
         if (selectedID < 0) {
             alert("Selecione um evento.");
@@ -656,11 +658,25 @@ class EventManager extends ElementManager {
             return;
         }
 
-        this.deleteEvent(selectedID);
-        tableManager.updateTable(EventManager, EventManager.eventList);
+        try {
+            const response = await fetch(`http://localhost:5502/api/events/${selectedID}`, {
+                method: "DELETE",
+                headers:{"Content-Type": "application/json"}
+            });
+        
+            if(!response.ok) {
+                throw new Error("Erro ao apagar evento");
+            }
+
+            alert("Evento apagado com sucesso!");
+            tableManager.updateTable(EventManager, EventManager.eventList);
+        } catch (error) {
+            console.error("Erro no frontend:", error);
+            alert("Erro ao apagar evento.");
+        }
     }
 
-    // TODO: Rever
+    
     static getEventsWithTypes(...types) {
         return EventManager.eventList.filter(e => types.includes(e.type));
     }
