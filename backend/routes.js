@@ -1,5 +1,5 @@
 //Endpoint da API
-
+"use strict";
 import express from "express";
 import { execute } from "../connection/database.js";
 
