@@ -222,6 +222,7 @@ class EventTypeManager extends ElementManager {
     createType(description){
         const newType = new EventType(EventTypeManager.currentId++, description);
         EventTypeManager.typeList.push(newType);
+        return newType;
     }
     
     /**
@@ -263,7 +264,7 @@ class EventTypeManager extends ElementManager {
         const saveButton = document.getElementById("saveEventType");
 
         if (saveButton) {
-            saveButton.addEventListener("click", () => {
+            saveButton.addEventListener("click", async () => {
                 const descriptionInput = document.getElementById("eventTypeDescription");
                 const description = descriptionInput.value.trim();
 
@@ -278,7 +279,8 @@ class EventTypeManager extends ElementManager {
                 if (EventTypeManager.typeList.find(type => type.id === id)) {
                     this.editType(id, description);
                 } else {
-                    this.createType(description);
+                    const type = this.createType(description);
+                    await fetchJSON("/types", "POST", type);
                 }
 
                 // Fechar modal e limpar campo
@@ -1211,7 +1213,7 @@ class TableManager {
 const tableManager = new TableManager();
 
 /**
- * Função para alternar entre páginas
+ * Função para alternar entre páginas.
  */
 function navigateTo(pageId) {
     document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
@@ -1234,10 +1236,36 @@ function navigateTo(pageId) {
 }
 
 /**
+ * Função para buscar dados em formato JSON a partir de um url.
+ * 
+ * @param {string} url - para enviar o pedido
+ * @param {string} method - método HTTP, default GET
+ * @param {Object} body - corpo do pedido
+ * @returns O corpo da resposta em formato JSON, ou undefined se ocorrer algum erro
+ */
+async function fetchJSON(url, method = "GET", body) {
+    const fetchOptions = {
+        method: method,
+        headers: { "Accept": "application/json" }
+    }
+
+    fetchOptions.body = body === void 0 ? JSON.stringify(body) : {}
+
+    try {
+        const response = await fetch(url, fetchOptions);
+        return response.ok ? await response.json() : void 0;
+    } catch (error) {
+        console.error(error);
+        return void 0;
+    }
+}
+
+
+/**
 * Retorna uma data em string no formato 'YYYY-MM-DD'.
 * 
 * @param {Date | string} date 
-* @returns 
+* @returns a data formatada
 */
 function dateToString(date) {
    if (!(date instanceof Date)) {

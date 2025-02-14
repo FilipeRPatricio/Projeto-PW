@@ -24,6 +24,7 @@ async function sendResponse(response, command = "", parameters = [], processResu
     result ?
     response.json(processResult(result)) :
     sendError(response);
+    console.log(result);
 }
 
 function sendError(response, status = 500, message) {
@@ -33,6 +34,10 @@ function sendError(response, status = 500, message) {
 function toNumber(number) {
     let num = Number(number);
     return isNaN(num) ? void 0 : num;
+}
+
+function toString(string) {
+    return String(string);
 }
 
 export async function testConnection(){
@@ -47,4 +52,4 @@ export async function testConnection(){
 
 // testConnection();
 
-export { execute, sendResponse, sendError, toNumber };
+export { execute, sendResponse, sendError, toNumber, toString };
