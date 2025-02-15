@@ -12,7 +12,7 @@ async function execute(command, parameters = []) {
         let [result] = await connection.execute(command, parameters);
         return result;
     } catch (error) {
-        console.error("erro ao executar query:", error);
+        console.error("Erro ao executar query:", error);
         return;
     } finally {
         connection?.release();
@@ -28,7 +28,7 @@ async function sendResponse(response, command = "", parameters = [], processResu
 }
 
 function sendError(response, status = 500, message) {
-    response.status(status).json(typeof message === "string" ? message : "Unknown error occured");
+    response.status(status).json(typeof message === "string" ? message : "Erro desconhecido");
 }
 
 function toNumber(number) {

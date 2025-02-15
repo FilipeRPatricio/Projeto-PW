@@ -180,6 +180,28 @@ class EventTypeManager extends ElementManager {
     }
 
     /**
+     * Atualiza a tabela com os tipos de eventos da base de dados.
+     */
+    static async updateTypesTable() {
+        const responseBody = await fetchJSON("/types/all", "GET");
+
+        if (responseBody) {
+            tableManager.updateTable(EventTypeManager, responseBody);
+        }
+    }
+
+    async getSelectedType() {
+        const selectedID = tableManager.getSelectedElementID();
+        let result;
+
+        selectedID > 0
+        ? result = await fetchJSON(`/types/${selectedID}`, "GET")
+        : alert("Por favor, selecione um tipo de evento antes de editar.");
+
+        return result;
+    }
+
+    /**
      * Inicializa os botões e a tabela
      */
     init() {
@@ -190,7 +212,7 @@ class EventTypeManager extends ElementManager {
         this.createType("Track");
         this.createType("BMX");
 
-        tableManager.updateTable(EventTypeManager, EventTypeManager.typeList);
+        EventTypeManager.updateTypesTable();
     }
 
     /**
@@ -245,12 +267,16 @@ class EventTypeManager extends ElementManager {
         const createButton = document.getElementById("type-create");
 
         if (createButton) {
-            createButton.addEventListener("click", () => {
-                const modal = document.getElementById("createEventTypeModal");
-                modal.classList.remove("hidden");
+            createButton.addEventListener("click", async () => {
+                // Obter o último ID
+                const types = await fetchJSON("/types/all");
+                const lastType = types?.at(-1);
         
                 // Preencher campo ID com o próximo ID disponível
-                document.getElementById("eventTypeId").value = EventTypeManager.currentId;
+                document.getElementById("eventTypeId").value = lastType.id + 1;
+
+                const modal = document.getElementById("createEventTypeModal");
+                modal?.classList.remove("hidden");
             });
         }
     }
@@ -287,8 +313,7 @@ class EventTypeManager extends ElementManager {
                 document.getElementById("createEventTypeModal").classList.add("hidden");
                 descriptionInput.value = "";
 
-                tableManager.updateTable(EventTypeManager, EventTypeManager.typeList);
-                
+                EventTypeManager.updateTypesTable();
             });
         }
     }
@@ -319,15 +344,9 @@ class EventTypeManager extends ElementManager {
         const editButton = document.getElementById("type-edit");
 
         if (editButton) {
-            editButton.addEventListener("click", () => {
+            editButton.addEventListener("click", async () => {
 
-                const selectedID = tableManager.getSelectedElementID();
-                if (selectedID < 0) {
-                    alert("Por favor, selecione um tipo de evento antes de editar.");
-                    return;
-                }
-
-                const selectedType = EventTypeManager.typeList.find(type => type.id ===  selectedID);
+                const selectedType = await this.getSelectedType();
                 if(!selectedType) {
                     alert("Erro, tipo de evento selecionado não encontrado.");
                     return;
@@ -337,8 +356,8 @@ class EventTypeManager extends ElementManager {
                 modal.classList.remove("hidden");
 
                 // Preenche o modal com os valores já existentes
-                document.getElementById("eventTypeId").value = selectedType.id;
-                document.getElementById("eventTypeDescription").value = selectedType.description;
+                document.getElementById("eventTypeId").value = selectedType[0].id;
+                document.getElementById("eventTypeDescription").value = selectedType[0].description;
 
                 // Ajusta o comportamento do botão de guardar para edição
                 document.getElementById("saveEventType").onclick = () => {
@@ -386,8 +405,7 @@ class EventTypeManager extends ElementManager {
                 }
 
                 EventTypeManager.typeList = EventTypeManager.typeList.filter(type => type.id !== selectedID);
-                tableManager.updateTable(EventTypeManager, EventTypeManager.typeList);
-
+                EventTypeManager.updateTypesTable();
             });
         }
     }
@@ -1125,7 +1143,7 @@ class TableManager {
      * @returns 
      */
     updateTable(type, list) {
-        if (type == null || list == null) {return;}
+        if (!type || !list) {return;}
 
         this.elemType = type;
         this.elemList = list;
@@ -1224,7 +1242,7 @@ function navigateTo(pageId) {
     
     switch(pageId) {
         case "EventType":
-            tableManager.updateTable(EventTypeManager, EventTypeManager.typeList);
+            EventTypeManager.updateTypesTable();
             break;
         case "Events":
             tableManager.updateTable(EventManager, EventManager.eventList);
@@ -1246,13 +1264,17 @@ function navigateTo(pageId) {
 async function fetchJSON(url, method = "GET", body) {
     const fetchOptions = {
         method: method,
+        mode: "cors",
         headers: { "Accept": "application/json" }
     }
 
-    fetchOptions.body = body === void 0 ? JSON.stringify(body) : {}
+    if (body) {
+        fetchOptions.headers["Content-type"] = "application/json";
+        fetchOptions.body = JSON.stringify(body);
+    }
 
     try {
-        const response = await fetch(url, fetchOptions);
+        const response = await fetch(`http://localhost:8081${url}`, fetchOptions);
         return response.ok ? await response.json() : void 0;
     } catch (error) {
         console.error(error);
