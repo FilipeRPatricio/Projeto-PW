@@ -191,6 +191,16 @@ class EventTypeManager extends ElementManager {
     }
 
     /**
+     * Retorna o número atual do auto_increment dos tipos de eventos.
+     * 
+     * @returns O próximo id para os tipos de eventos
+     */
+    async getAutoIncrementId() {
+        const result = await fetchJSON("/types/auto-inc", "GET");
+        return result[0].AUTO_INCREMENT;
+    }
+
+    /**
      * Procura e retorna o tipo de evento que está selecionado na tabela.
      * 
      * @returns O tipo de evento selecionado
@@ -274,12 +284,8 @@ class EventTypeManager extends ElementManager {
 
         if (createButton) {
             createButton.addEventListener("click", async () => {
-                // Obter o último ID
-                const types = await fetchJSON("/types/all");
-                const lastType = types?.at(-1);
-        
                 // Preencher campo ID com o próximo ID disponível
-                document.getElementById("eventTypeId").value = lastType.id + 1;
+                document.getElementById("eventTypeId").value = await this.getAutoIncrementId();
 
                 const modal = document.getElementById("createEventTypeModal");
                 modal?.classList.remove("hidden");
@@ -306,12 +312,16 @@ class EventTypeManager extends ElementManager {
                 }
 
                 const id = parseInt(document.getElementById("eventTypeId").value);
+                console.log(id);
                 const existingType = await fetchJSON(`/types/${id}`, "GET");
 
                 // Criar ou editar novo tipo de evento e atualizar tabela
-                if (existingType) {
+                if (existingType.length !== 0) {
+
                     const editedType = this.editType(existingType[0], description);
+                    console.log(existingType);
                     await fetchJSON(`/types/${id}`, "PUT", editedType);
+
                 } else {
                     const type = new EventType(id, description);
                     await fetchJSON("/types", "POST", type);
@@ -391,13 +401,15 @@ class EventTypeManager extends ElementManager {
         const deleteButton = document.getElementById("type-delete");
 
         if (deleteButton) {
-            deleteButton.addEventListener("click", () => {
+            deleteButton.addEventListener("click", async () => {
 
-                const selectedID = tableManager.getSelectedElementID();
-                if (selectedID < 0) {
-                    alert("Selecione um tipo de evento antes de apagar.");
+                const selectedType = await this.getSelectedType();
+                if(!selectedType) {
+                    alert("Erro, tipo de evento selecionado não encontrado.");
                     return;
                 }
+                
+                const selectedID = selectedType[0].id;
 
                 const confirmed = confirm("Tem a certeza que deseja apagar este tipo de evento?");
                 if (!confirmed) {return;}
@@ -412,7 +424,7 @@ class EventTypeManager extends ElementManager {
                     return;
                 }
 
-                EventTypeManager.typeList = EventTypeManager.typeList.filter(type => type.id !== selectedID);
+                await fetchJSON(`/types/${selectedID}`, "DELETE");
                 EventTypeManager.updateTypesTable();
             });
         }
