@@ -190,6 +190,11 @@ class EventTypeManager extends ElementManager {
         }
     }
 
+    /**
+     * Procura e retorna o tipo de evento que está selecionado na tabela.
+     * 
+     * @returns O tipo de evento selecionado
+     */
     async getSelectedType() {
         const selectedID = tableManager.getSelectedElementID();
         let result;
@@ -248,16 +253,17 @@ class EventTypeManager extends ElementManager {
     }
     
     /**
-     * Edita um tipo de evento a partir do seu id.
+     * Edita um tipo de evento.
      * 
-     * @param {number} id - 
-     * @param {string} newDescription - 
+     * @param {EventType} type - tipo de evento a editar
+     * @param {string} newDescription - nova descrição do tipo de evento
+     * @returns o tipo de evento
      */
-    editType(id, newDescription) {
-        const type = EventTypeManager.typeList.find(type => type.id === id);
+    editType(type, newDescription) {
         if (type) {
             type.description = newDescription;
         }
+        return type;
     }
 
     /**
@@ -300,12 +306,14 @@ class EventTypeManager extends ElementManager {
                 }
 
                 const id = parseInt(document.getElementById("eventTypeId").value);
+                const existingType = await fetchJSON(`/types/${id}`, "GET");
 
-                // Criar novo tipo de evento e atualizar tabela
-                if (EventTypeManager.typeList.find(type => type.id === id)) {
-                    this.editType(id, description);
+                // Criar ou editar novo tipo de evento e atualizar tabela
+                if (existingType) {
+                    const editedType = this.editType(existingType[0], description);
+                    await fetchJSON(`/types/${id}`, "PUT", editedType);
                 } else {
-                    const type = this.createType(description);
+                    const type = new EventType(id, description);
                     await fetchJSON("/types", "POST", type);
                 }
 
