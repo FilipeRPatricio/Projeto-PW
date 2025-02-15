@@ -24,7 +24,6 @@ async function sendResponse(response, command = "", parameters = [], processResu
     result ?
     response.json(processResult(result)) :
     sendError(response);
-    console.log(result);
 }
 
 function sendError(response, status = 500, message) {
