@@ -18,7 +18,9 @@ import updateMember from "./routes/members/update-member.js";
 import deleteMember from "./routes/members/delete-member.js";
 
 /* Tipos de Eventos Favoritos */
-
+import readFavorites from "./routes/favorite-types/read-favorites.js";
+import createFavorite from "./routes/favorite-types/create-favorite.js";
+import deleteFavorite from "./routes/favorite-types/delete-favorite.js";
 
 /* Membros Inscritos */
 
@@ -29,7 +31,7 @@ const port = 8081;
 
 app.use(cors({ origin: "*" }));              // Permite que o frontend aceda ao backend
 app.use(express.json());                     // Processar o json no body
-//app.use("/api", routes);
+
 
 // Routes para os tipos de eventos
 app.get("/types/auto-inc", typesAutoIncrement)
@@ -48,7 +50,9 @@ app.put("/members/:id", updateMember);
 app.delete("members/:id", deleteMember);
 
 // Routes para os tipos de eventos favoritos
-
+app.get("/favorites/:id", readFavorites);
+app.post("/favorites", createFavorite);
+app.delete("/favorites", deleteFavorite);
 
 // Routes para os membros inscritos em eventos
 
