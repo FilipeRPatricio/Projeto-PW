@@ -1,6 +1,6 @@
 "use strict";
 
-import { sendResponse, sendError, toNumber } from "../connection/database.js";
+import { sendResponse, sendError, toNumber } from "../../connection/database.js";
 
 const deleteTypeCommand = "delete from `EventType` where `id` = ?";
 

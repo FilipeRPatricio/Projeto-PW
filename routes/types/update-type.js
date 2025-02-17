@@ -1,6 +1,6 @@
 "use strict";
 
-import { sendResponse, sendError, toNumber, toString } from "../connection/database.js";
+import { sendResponse, sendError, toNumber, toString } from "../../connection/database.js";
 
 const updateTypeCommand = "update `EventType` set `description` = ? where `id` = ?"
 

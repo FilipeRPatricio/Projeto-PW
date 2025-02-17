@@ -1,6 +1,6 @@
 "use strict";
 
-import { sendResponse, toNumber } from "../connection/database.js";
+import { sendResponse, toNumber } from "../../connection/database.js";
 
 const commandSelectAll = "select `id`, `description` from `EventType`";
 const commandSelectId = "select `id`, `description` from `EventType` where `id` = ?";

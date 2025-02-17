@@ -1,12 +1,28 @@
 "use strict";
 import express from "express";
 import cors from "cors";
-import routes from "./routes/routes.js";     // Importa as rotas
 
-import { readTypes, typesAutoIncrement } from "./routes/read-types.js";
-import createType from "./routes/create-type.js";
-import updateType from "./routes/update-type.js";
-import deleteType from "./routes/delete-type.js";
+/* Tipos de Eventos */
+import { readTypes, typesAutoIncrement } from "./routes/types/read-types.js";
+import createType from "./routes/types/create-type.js";
+import updateType from "./routes/types/update-type.js";
+import deleteType from "./routes/types/delete-type.js";
+
+/* Eventos */
+
+
+/* Membros */
+import readMembers from "./routes/members/read-members.js";
+import createMember from "./routes/members/create-member.js";
+import updateMember from "./routes/members/update-member.js";
+import deleteMember from "./routes/members/delete-member.js";
+
+/* Tipos de Eventos Favoritos */
+
+
+/* Membros Inscritos */
+
+
 
 const app = express();
 const port = 8081;
@@ -21,6 +37,22 @@ app.get("/types/:id", readTypes);
 app.post("/types", createType);
 app.put("/types/:id", updateType);
 app.delete("/types/:id", deleteType);
+
+// Routes para os eventos
+
+
+// Routes para os membros
+app.get("/members/:id", readMembers);
+app.post("/members", createMember);
+app.put("/members/:id", updateMember);
+app.delete("members/:id", deleteMember);
+
+// Routes para os tipos de eventos favoritos
+
+
+// Routes para os membros inscritos em eventos
+
+
 
 app.listen(port, () => {
     console.log(`Servidor a correr em http://localhost:${port}`);

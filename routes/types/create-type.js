@@ -1,6 +1,6 @@
 "use strict";
 
-import { sendResponse, sendError, toString } from "../connection/database.js";
+import { sendResponse, sendError, toString } from "../../connection/database.js";
 
 const createTypeCommand = "insert into `EventType` (`description`) values (?)";
 
