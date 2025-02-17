@@ -18,12 +18,14 @@ import updateMember from "./routes/members/update-member.js";
 import deleteMember from "./routes/members/delete-member.js";
 
 /* Tipos de Eventos Favoritos */
-import readFavorites from "./routes/favorite-types/read-favorites.js";
+import { readFavorites, readFavoritesOfMember, readFavoritesWithType } from "./routes/favorite-types/read-favorites.js";
 import createFavorite from "./routes/favorite-types/create-favorite.js";
 import deleteFavorite from "./routes/favorite-types/delete-favorite.js";
 
 /* Membros Inscritos */
-
+import { readRegistrations, readMemberRegistrations, readEventRegistrations } from "./routes/registration/read-registrations.js";
+import createRegistration from "./routes/registration/create-registration.js";
+import deleteRegistration from "./routes/registration/delete-registration.js";
 
 
 const app = express();
@@ -35,7 +37,7 @@ app.use(express.json());                     // Processar o json no body
 
 // Routes para os tipos de eventos
 app.get("/types/auto-inc", typesAutoIncrement)
-app.get("/types/:id", readTypes);
+app.get("/types/:id?", readTypes);
 app.post("/types", createType);
 app.put("/types/:id", updateType);
 app.delete("/types/:id", deleteType);
@@ -44,18 +46,24 @@ app.delete("/types/:id", deleteType);
 
 
 // Routes para os membros
-app.get("/members/:id", readMembers);
+app.get("/members/:id?", readMembers);
 app.post("/members", createMember);
 app.put("/members/:id", updateMember);
 app.delete("members/:id", deleteMember);
 
 // Routes para os tipos de eventos favoritos
-app.get("/favorites/:id", readFavorites);
+app.get("/favorites", readFavorites);
+app.get("/favorites/:member", readFavoritesOfMember);
+app.get("/favorites/type/:type", readFavoritesWithType);
 app.post("/favorites", createFavorite);
 app.delete("/favorites", deleteFavorite);
 
 // Routes para os membros inscritos em eventos
-
+app.get("/registrations", readRegistrations);
+app.get("/registrations/:member", readMemberRegistrations);
+app.get("/registrations/event/:event", readEventRegistrations);
+app.post("/registrations", createRegistration);
+app.delete("/registrations", deleteRegistration);
 
 
 app.listen(port, () => {
