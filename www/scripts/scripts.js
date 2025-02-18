@@ -7,6 +7,8 @@
     TODO: Verificações extra: i.e. datas que já passaram, tipos de eventos que já existem
 */
 
+//#region Classe EventType
+
 /**
  * Classe EventType
  * 
@@ -35,7 +37,9 @@ class EventType {
     }
 }
 
+//#endregion
 
+//#region Classe Events
 
 /**
  * Classe Events
@@ -79,7 +83,9 @@ class Events {
     }
 }
 
+//#endregion
 
+//#region Classe Member
 
 /**
  * Classe Member
@@ -141,7 +147,9 @@ class Member {
     }
 }
 
+//#endregion
 
+//#region Managers
 
 /**
  * Classe ElementManager
@@ -150,7 +158,7 @@ class Member {
  */
 class ElementManager {}
 
-
+//#region EventTypes
 
 /**
  * Classe EventTypeManager
@@ -451,7 +459,9 @@ class EventTypeManager extends ElementManager {
     }
 }
 
+//#endregion
 
+//#region Events
 
 /**
  * Classe EventManager
@@ -732,7 +742,9 @@ class EventManager extends ElementManager {
     }
 }
 
+//#endregion
 
+//#region Members
 
 /**
  * Classe MemberManager
@@ -988,7 +1000,9 @@ class MemberManager extends ElementManager {
     }
 }
 
+//#endregion
 
+//#region Checkboxes
 
 /**
  * Classe CheckboxManager
@@ -1100,7 +1114,9 @@ class CheckboxManager {
     }
 }
 
+//#endregion
 
+//#region Tables
 
 /**
  * Classe TableManager
@@ -1243,12 +1259,14 @@ class TableManager {
     }
 }
 
-
-
-
-
 // Gestor de Tabelas
 const tableManager = new TableManager();
+
+//#endregion
+
+//#endregion
+
+//#region Help Functions
 
 /**
  * Função para alternar entre páginas.
@@ -1319,6 +1337,8 @@ function dateToString(date) {
 
    return `${date.getFullYear()}-${month}-${day}`;
 }
+
+//#endregion
 
 /**
  * Função chamada quando a página é carregada
