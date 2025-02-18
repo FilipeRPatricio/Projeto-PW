@@ -188,20 +188,59 @@ class EventTypeManager extends ElementManager {
     }
 
     /**
+     * Retorna todos os tipos de eventos.
+     * 
+     * @returns um array com todos os tipos de eventos
+     * @async
+     */
+    static async getTypes() {
+        return await fetchJSON("/types/all", "GET");
+    }
+
+    /**
      * Atualiza a tabela com os tipos de eventos da base de dados.
+     * 
+     * @async
      */
     static async updateTypesTable() {
-        const responseBody = await fetchJSON("/types/all", "GET");
+        const types = await EventTypeManager.getTypes();
 
-        if (responseBody) {
-            tableManager.updateTable(EventTypeManager, responseBody);
+        if (types) {
+            tableManager.updateTable(EventTypeManager, types);
         }
+    }
+
+    /**
+     * Retorna o Tipo de Evento encontrado com o id recebido.
+     * 
+     * @param {number} id - O id a procurar
+     * @returns EventType com o id ou undefined caso não exista
+     * @async
+     */
+    static async getTypeById(id) {
+        let result = await fetchJSON(`/types/${id}`, "GET");
+
+        return result ? result[0] : void 0;
+    }
+    
+    /**
+     * Retorna o Tipo de Evento encontrado com a descrição recebida.
+     * 
+     * @param {string} description - A descrição a procurar
+     * @returns EventType com a descrição ou undefined caso não exista
+     * @async
+     */
+    static async getTypeByDescription(description) {
+        let result = await fetchJSON(`/types/desc/${description}`, "GET");
+        
+        return result ? result[0] : void 0;
     }
 
     /**
      * Retorna o número atual do auto_increment dos tipos de eventos.
      * 
      * @returns O próximo id para os tipos de eventos
+     * @async
      */
     async getAutoIncrementId() {
         const result = await fetchJSON("/types/auto-inc", "GET");
@@ -212,6 +251,7 @@ class EventTypeManager extends ElementManager {
      * Procura e retorna o tipo de evento que está selecionado na tabela.
      * 
      * @returns O tipo de evento selecionado
+     * @async
      */
     async getSelectedType() {
         const selectedID = tableManager.getSelectedElementID();
@@ -229,11 +269,6 @@ class EventTypeManager extends ElementManager {
      */
     init() {
         this.initializeButtons();
-
-        // Valores Default para Testes
-        this.createType("BTT");
-        this.createType("Track");
-        this.createType("BMX");
 
         EventTypeManager.updateTypesTable();
     }
@@ -257,17 +292,6 @@ class EventTypeManager extends ElementManager {
         
         // Botão "Apagar"
         this.#deleteTypeButton();
-    }
-
-    /**
-    * Cria um novo tipo de evento e adiciona-o à lista.
-    * 
-    * @param {string} description - Descrição do tipo de evento.
-    */
-    createType(description){
-        const newType = new EventType(EventTypeManager.currentId++, description);
-        EventTypeManager.typeList.push(newType);
-        return newType;
     }
     
     /**
@@ -320,14 +344,12 @@ class EventTypeManager extends ElementManager {
                 }
 
                 const id = parseInt(document.getElementById("eventTypeId").value);
-                console.log(id);
                 const existingType = await fetchJSON(`/types/${id}`, "GET");
 
                 // Criar ou editar novo tipo de evento e atualizar tabela
                 if (existingType.length !== 0) {
 
                     const editedType = this.editType(existingType[0], description);
-                    console.log(existingType);
                     await fetchJSON(`/types/${id}`, "PUT", editedType);
 
                 } else {
@@ -437,26 +459,6 @@ class EventTypeManager extends ElementManager {
             });
         }
     }
-
-    /**
-     * Retorna o Tipo de Evento encontrado com o id recebido.
-     * 
-     * @param {number} id - O id a procurar
-     * @returns EventType com o id ou undefined caso não exista
-     */
-    static getTypeById(id) {
-        return EventTypeManager.typeList.find(t => t.id === id);
-    }
-
-    /**
-     * Retorna o Tipo de Evento encontrado com a descrição recebida.
-     * 
-     * @param {string} description - A descrição a procurar
-     * @returns EventType com a descrição ou undefined caso não exista
-     */
-    static getTypeByDescription(description) {
-        return EventTypeManager.typeList.find(t => t.description === description);
-    }
 }
 
 //#endregion
@@ -547,14 +549,15 @@ class EventManager extends ElementManager {
     /**
      * Cria um novo evento e adiciona-o à lista.
      * 
-     * @param {EventType} type - O tipo do evento
+     * @param {string} type - O tipo do evento
      * @param {string} description - A descrição do evento
      * @param {Date | string} date - A data do evento
      * @returns 
+     * @async
      */
-    createEvent(type, description, date) {
+    async createEvent(type, description, date) {
         // Encontra o tipo de evento com a mesma descrição
-        const eventType = EventTypeManager.typeList.find(t => t.description === type);
+        const eventType = await EventTypeManager.getTypeByDescription(type);
         if (!eventType) {
             alert("Tipo de evento não encontrado.")
             return;
@@ -582,12 +585,7 @@ class EventManager extends ElementManager {
             return;
         }
 
-        const eventIdString = document.getElementById("event-id");
-        if (!eventIdString) {
-            return;
-        }
-
-        const eventId = parseInt(eventIdString.value);
+        const eventId = parseInt(document.getElementById("event-id")?.value);
     
         if (EventManager.eventList.some(event => event.id === eventId)) {
             this.editEvent(eventId, type, description, date);
@@ -692,6 +690,7 @@ class EventManager extends ElementManager {
      * Apaga o evento selecionado.
      * 
      * @returns 
+     * @async
      */
     async deleteSelectedEvent() {
         const selectedID = tableManager.getSelectedElementID();
@@ -781,70 +780,77 @@ class MemberManager extends ElementManager {
     }
 
     /**
+     * Atualiza a tabela com os membros da base de dados.
+     * 
+     * @async
+     */
+    static async updateMembersTable() {
+        const members = await fetchJSON("/members/all", "GET");
+
+        if (members) {
+            tableManager.updateTable(MemberManager, members);
+        }
+    }
+
+    /**
+     * Retorna o membro encontrado com o id recebido.
+     * 
+     * @param {number} id - O id a procurar
+     * @returns Member com o id ou undefined caso não exista
+     * @async
+     */
+    static async getMemberById(id) {
+        let result = await fetchJSON(`/members/${id}`, "GET");
+
+        return result ? result[0] : void 0;
+    }
+
+    /**
+     * Retorna o número atual do auto_increment dos membros.
+     * 
+     * @returns O próximo id para os membros
+     * @async
+     */
+    async getAutoIncrementId() {
+        const result = await fetchJSON("/members/auto-inc", "GET");
+        return result[0].AUTO_INCREMENT;
+    }
+
+    /**
+     * Procura e retorna o membro que está selecionado na tabela.
+     * 
+     * @returns O membro selecionado
+     * @async
+     */
+    async getSelectedMember() {
+        const selectedID = tableManager.getSelectedElementID();
+        let result;
+
+        selectedID > 0
+        ? result = await fetchJSON(`/members/${selectedID}`, "GET")
+        : alert("Por favor, selecione um membro antes de editar.");
+
+        return result;
+    }
+
+    /**
      * Inicializa os botões e a tabela.
      */
     init() {
         this.createButtons();
 
-        // Valores Default para Testes
-        this.createMember("Tiago");
-        this.createMember("Filipe");
-        this.createMember("João");
-
-        tableManager.updateTable(MemberManager, MemberManager.memberList);
-    }
-
-    /**
-     * Cria um novo membro.
-     * 
-     * @param {string} description - O nome do membro a criar
-     * @param {EventType[]} favoriteEventTypes - Os tipos de eventos preferidos do membro a criar
-     */
-    createMember(description, favoriteEventTypes = []) {
-        // Filtra os tipos de eventos preferidos que são da classe EventType
-        const validTypes = favoriteEventTypes.filter(type => type instanceof EventType);
-
-        const newMember = new Member(MemberManager.currentId++, description);
-        newMember.favoriteEventTypes = validTypes;
-
-        MemberManager.memberList.push(newMember);
-    }
-
-    /**
-     * Edita um membro do clube a partir de um id.
-     * 
-     * @param {number} id - O id do membro a editar
-     * @param {string} newdescription - O novo nome do membro
-     * @param {EventType[]} newFavoriteEventTypes - Os novos tipos de eventos preferidos do membro a editar
-     */
-    editMember(id, newdescription, newFavoriteEventTypes = []) {
-        const member = MemberManager.memberList.find(m => m.id === id);
-        if(member) {
-            const validTypes = newFavoriteEventTypes.filter(type => type instanceof EventType);
-
-            member.description = newdescription;
-            member.favoriteEventTypes = validTypes;
-        }
-    }
-
-    /**
-     * Apaga um membro do clube a partir de um id.
-     * 
-     * @param {number} id - O id do membro a apagar
-     */
-    deleteMember(id) {
-        MemberManager.memberList = MemberManager.memberList.filter(m => m.id !== id);
+        MemberManager.updateMembersTable();
     }
 
     /**
      * Inicializa as ações dos botões de criar, editar, apagar, guardar e cancelar.
      */
     createButtons() {
-        this.#addAction("member-create", "click", () => this.openModal());
-        this.#addAction("saveMember", "click", () => this.saveMember());
+        this.#addAction("member-create", "click", async () => await this.openModal());
+        this.#addAction("saveMember", "click", async () => await this.saveMember());
         this.#addAction("cancelMember", "click", () => this.closeModal());
-        this.#addAction("member-edit", "click", () => this.editSelectedMember());
-        this.#addAction("member-delete", "click", () => this.deleteSelectedMember());
+        this.#addAction("member-edit", "click", async () => await this.editSelectedMember());
+        this.#addAction("member-delete", "click", async () => await this.deleteSelectedMember());
     }
 
     /**
@@ -862,37 +868,100 @@ class MemberManager extends ElementManager {
     }
 
     /**
+     * Cria um novo membro com a descrição e tipos de eventos favoritos recebidos.
+     * 
+     * @param {string} description - A descrição do membro
+     * @param {number[]} favoriteTypes - Um array com os ids dos tipos de eventos favoritos do membro
+     * @async
+     */
+    async createMember(description, favoriteTypes = []) {
+        let result = await fetchJSON("/members", "POST", { "description": description });
+
+        if (result) {
+            const id = result.insertId;
+            await this.updateFavoriteTypes(id, favoriteTypes);
+        }
+    }
+
+    /**
+     * Edita um membro do clube a partir de um id.
+     * 
+     * @param {number} id - O id do membro a editar
+     * @param {string} newDescription - O novo nome do membro
+     * @param {number[]} newFavoriteEventTypes - Os ids dos novos tipos de eventos preferidos do membro a editar
+     * @async
+     */
+    async editMember(id, newDescription, newFavoriteEventTypes = []) {
+        let result = await fetchJSON(`/members/${id}`, "PUT", { "description": newDescription });
+
+        if (result) {
+            await this.updateFavoriteTypes(id, newFavoriteEventTypes);
+        }
+    }
+
+    /**
+     * Atualiza os tipos de eventos favoritos de um membro.
+     * 
+     * @param {number} memberId - O id do membro a atualizar
+     * @param {number[]} favoriteTypes - Os novos tipos favoritos do membro
+     * @returns 
+     * @async
+     */
+    async updateFavoriteTypes(memberId, favoriteTypes = []) {
+        let typeList = await fetchJSON(`/favorites/${memberId}`, "GET");
+
+        if (!typeList) { return; }
+
+        // Filtra os tipos adicionados
+        // i.e. os que estão em favoriteTypes, mas não em typeList
+        const addedTypes = favoriteTypes.filter(
+            t => !typeList.some(type => type.EventType === t)
+        );
+
+        // Filtra os tipos removidos
+        // i.e. os que estão em typeList, mas não em favoriteTypes
+        const removedTypes = typeList.filter(
+            type => !favoriteTypes.some(t => t === type.EventType)
+        );
+
+        for (const newType of addedTypes) {
+            await fetchJSON("/favorites", "POST", { "member": memberId, "eventType": newType });
+        }
+
+        for (const oldType of removedTypes) {
+            await fetchJSON("/favorites", "DELETE", { "member": memberId, "eventType": oldType.EventType });
+        }
+    }
+
+    /**
      * Abre a aba de criação ou edição de membro, caso seja recebido um parâmetro.
      * 
      * @param {Member} member - O membro a editar
      * @returns 
+     * @async
      */
-    openModal(member = null) {
-        const modal = document.getElementById("create-member-modal");
-        if (!modal) {
-            return;
-        }
+    async openModal(member = null) {
 
         const id = document.getElementById("member-id");
         const description = document.getElementById("member-name");
 
         if (!id || !description) return;
 
-        this.checkboxManager.updateCheckboxes(EventTypeManager.typeList);
+        this.checkboxManager.updateCheckboxes(await EventTypeManager.getTypes());
 
         if (member) {
             document.getElementById("modal-register")?.classList.remove("hidden");
 
             id.value = member.id;
             description.value = member.description;
-            this.checkboxManager.checkFavoriteEventTypes(member.favoriteEventTypes);
+            await this.checkboxManager.checkFavoriteEventTypes(member.id);
 
         } else {
-            id.value = MemberManager.currentId;
+            id.value = await this.getAutoIncrementId();
             description.value = "";
         }
 
-        modal.classList.remove("hidden");
+        document.getElementById("create-member-modal")?.classList.remove("hidden");
     }
 
     /**
@@ -911,8 +980,9 @@ class MemberManager extends ElementManager {
      * Cria um novo membro com os dados inseridos. 
      * 
      * @returns 
+     * @async
      */
-    saveMember() {
+    async saveMember() {
         let description = document.getElementById("member-name");
         if (!description || description.value.trim() === "") {
             alert("Insira um nome válido");
@@ -922,52 +992,43 @@ class MemberManager extends ElementManager {
         description = description.value.trim();
 
         const checkedTypes = this.checkboxManager.getCheckedEventTypes();
-        const favoriteTypes = [];
-        checkedTypes.forEach(type => {
-            const typeId = EventTypeManager.getTypeById(type);
-            if (typeId !== void 0) {
-                favoriteTypes.push(typeId);
-            }
-        });
-        
-        const memberId = document.getElementById("member-id");
-        if (!memberId) {
-            return;
-        }
-        const id = parseInt(memberId.value, 10); 
+        const id = parseInt(document.getElementById("member-id")?.value, 10); 
     
-        if (MemberManager.memberList.some(m => m.id === id)) {
-            this.editMember(id, description, favoriteTypes);
+        if (await MemberManager.getMemberById(id)) {
+            await this.editMember(id, description, checkedTypes);
+            console.log()
         } else {
-            this.createMember(description, favoriteTypes);
+            await this.createMember(description, checkedTypes);
         }
     
         this.closeModal();
-        tableManager.updateTable(MemberManager, MemberManager.memberList);
+        MemberManager.updateMembersTable();
     }
 
     /**
      * Edita um membro e abre o modal com a informação dele.
      * 
      * @returns 
+     * @async
      */
-    editSelectedMember() {
+    async editSelectedMember() {
         const selectedID = tableManager.getSelectedElementID();
         if (selectedID < 0) {
             alert("Selecione um membro.");
             return;
         }
 
-        const member = MemberManager.memberList.find(m => m.id === selectedID);
-        if (member) this.openModal(member);
+        const member = await this.getSelectedMember();
+        if (member) await this.openModal(member[0]);
     }
 
     /**
      * Apaga o membro selecionado.
      * 
      * @returns 
+     * @async
      */
-    deleteSelectedMember() {
+    async deleteSelectedMember() {
         const selectedID = tableManager.getSelectedElementID();
         if (selectedID < 0) {
             alert("Selecione um membro.");
@@ -976,9 +1037,19 @@ class MemberManager extends ElementManager {
 
         const confirmed = confirm("Deseja mesmo apagar este membro?");
         if (confirmed) {
-            this.deleteMember(selectedID);
-            tableManager.updateTable(MemberManager, MemberManager.memberList);
+            await this.deleteMember(selectedID);
+            MemberManager.updateMembersTable();
         }
+    }
+
+    /**
+     * Apaga um membro do clube a partir do seu id.
+     * 
+     * @param {number} id - O id do membro a apagar
+     * @async
+     */
+    async deleteMember(id) {
+        await fetchJSON(`/members/${id}`, "DELETE");
     }
 
     /**
@@ -1065,18 +1136,22 @@ class CheckboxManager {
     /**
      * Seleciona as checkboxes que correspondem aos Tipos de Eventos na lista.
      * 
-     * @param {EventType[]} typeList - A lista de Tipos de Eventos a selecionar
+     * @param {number} memberId - O id do membro a verificar os tipos favoritos
+     * @async
      */
-    checkFavoriteEventTypes(typeList = []) {
+    async checkFavoriteEventTypes(memberId) {
         const checkboxes = this.#getCheckboxes();
+        let typeList = await fetchJSON(`/favorites/${memberId}`, "GET");
 
-        checkboxes.forEach(checkbox => {
-            const type = EventTypeManager.getTypeById(parseInt(checkbox.value, 10));
+        if (typeList) {
+            checkboxes.forEach(checkbox => {
+                const type = parseInt(checkbox.value, 10);
 
-            if (typeList.includes(type)) {
-                checkbox.checked = true;
-            }
-        });
+                if (typeList.some(t => t.EventType === type)) {
+                    checkbox.checked = true;
+                }
+            });
+        }
     }
 
     /**
@@ -1286,7 +1361,7 @@ function navigateTo(pageId) {
             tableManager.updateTable(EventManager, EventManager.eventList);
             break;
         case "Members":
-            tableManager.updateTable(MemberManager, MemberManager.memberList);
+            MemberManager.updateMembersTable();
             break;
     }
 }
@@ -1298,6 +1373,7 @@ function navigateTo(pageId) {
  * @param {string} method - método HTTP, default GET
  * @param {Object} body - corpo do pedido
  * @returns O corpo da resposta em formato JSON, ou undefined se ocorrer algum erro
+ * @async
  */
 async function fetchJSON(url, method = "GET", body) {
     const fetchOptions = {

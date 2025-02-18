@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 
 /* Tipos de Eventos */
-import { readTypes, typesAutoIncrement } from "./routes/types/read-types.js";
+import { readTypes, readTypeWithDescription, typesAutoIncrement } from "./routes/types/read-types.js";
 import createType from "./routes/types/create-type.js";
 import updateType from "./routes/types/update-type.js";
 import deleteType from "./routes/types/delete-type.js";
@@ -12,7 +12,7 @@ import deleteType from "./routes/types/delete-type.js";
 
 
 /* Membros */
-import readMembers from "./routes/members/read-members.js";
+import { readMembers, membersAutoIncrement } from "./routes/members/read-members.js";
 import createMember from "./routes/members/create-member.js";
 import updateMember from "./routes/members/update-member.js";
 import deleteMember from "./routes/members/delete-member.js";
@@ -37,6 +37,7 @@ app.use(express.json());                     // Processar o json no body
 
 // Routes para os tipos de eventos
 app.get("/types/auto-inc", typesAutoIncrement)
+app.get("/types/desc/:description", readTypeWithDescription);
 app.get("/types/:id?", readTypes);
 app.post("/types", createType);
 app.put("/types/:id", updateType);
@@ -46,10 +47,11 @@ app.delete("/types/:id", deleteType);
 
 
 // Routes para os membros
+app.get("/members/auto-inc", membersAutoIncrement);
 app.get("/members/:id?", readMembers);
 app.post("/members", createMember);
 app.put("/members/:id", updateMember);
-app.delete("members/:id", deleteMember);
+app.delete("members/:id", deleteMember);      // Rever
 
 // Routes para os tipos de eventos favoritos
 app.get("/favorites", readFavorites);

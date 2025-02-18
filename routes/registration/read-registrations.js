@@ -2,7 +2,7 @@
 
 import { sendResponse, sendError, toNumber } from "../../connection/database.js";
 
-const commandSelectAll = "select `Event`, `Member` from `Registration`";
+const commandSelectAll = "select `Event`, `Member` from `Registration` order by `Event` ASC";
 const commandSelectMemberId = "select `Event`, `Member` from `Registration` where `Member` = ?";
 const commandSelectEventId = "select `Event`, `Member` from `Registration` where `Event` = ?";
 

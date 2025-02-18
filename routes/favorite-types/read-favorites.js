@@ -2,7 +2,7 @@
 
 import { sendResponse, sendError, toNumber } from "../../connection/database.js";
 
-const commandSelectAll = "select `Member`, `EventType` from `FavoriteType`";
+const commandSelectAll = "select `Member`, `EventType` from `FavoriteType` order by `EventType` ASC";
 const commandSelectMemberId = "select `Member`, `EventType` from `FavoriteType` where `Member` = ?";
 const commandSelectTypeId = "select `Member`, `EventType` from `FavoriteType` where `EventType` = ?";
 
@@ -24,7 +24,6 @@ async function readFavorites(request, response) {
  */
 async function readFavoritesOfMember(request, response) {
     const member = toNumber(request.params.member);
-    console.log(member);
 
     if (member) {
         await sendResponse(response, commandSelectMemberId, [member], (result) => result);
@@ -41,7 +40,6 @@ async function readFavoritesOfMember(request, response) {
  */
 async function readFavoritesWithType(request, response) {
     const type = toNumber(request.params.type);
-    console.log(type);
 
     if (type) {
         await sendResponse(response, commandSelectTypeId, [type], (result) => result);

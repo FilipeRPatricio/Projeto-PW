@@ -48,6 +48,10 @@ Create Table Registration (
 
 -- Índices
 Create index index_event_types on EventType (ID);
+Create index index_types_description on EventType (Description);
+Create index index_event on Event (ID);
+Create index index_event_type on Event (Type);
+Create index index_member on Member (ID);
 Create index index_favorite_types on FavoriteType (Member, EventType);
 Create index index_registrations on Registration (Event, Member);
 

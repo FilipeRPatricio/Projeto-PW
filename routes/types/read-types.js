@@ -1,8 +1,8 @@
 "use strict";
 
-import { sendResponse, toNumber } from "../../connection/database.js";
+import { sendResponse, sendError, toNumber, toString } from "../../connection/database.js";
 
-const commandSelectAll = "select `id`, `description` from `EventType`";
+const commandSelectAll = "select `id`, `description` from `EventType` order by `id` ASC";
 const commandSelectId = "select `id`, `description` from `EventType` where `id` = ?";
 
 /**
@@ -19,6 +19,26 @@ async function readTypes(request, response) {
 
 
 
+const selectDescriptionCommand = "select `id`, `description` from `EventType` where `description` = ?";
+
+/**
+ * Mostra os tipos de eventos com a descrição pedida.
+ * 
+ * @param {*} request 
+ * @param {*} response 
+ */
+async function readTypeWithDescription(request, response) {
+    const description = toString(request.params.description);
+
+    if (description) {
+        await sendResponse(response, selectDescriptionCommand, [description], (result) => result);
+    } else {
+        sendError(response, 500, "Erro, descrição não encontrada");
+    }
+}
+
+
+
 const selectAutoIncrementCommand = "select `AUTO_INCREMENT` from information_schema.tables where table_schema = 'ESTSBike' and table_name = 'EventType'";
 
 /**
@@ -31,4 +51,4 @@ async function typesAutoIncrement(request, response) {
     await sendResponse(response, selectAutoIncrementCommand, [], (result) => result);
 }
 
-export { readTypes, typesAutoIncrement }
+export { readTypes, readTypeWithDescription, typesAutoIncrement };
