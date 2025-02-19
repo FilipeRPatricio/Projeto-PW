@@ -5,25 +5,38 @@ Use ESTSBike;
 Create User if not exists PW Identified by 'PW@123';
 Grant ALL PRIVILEGES on ESTSBike.* to PW;
 
+-- Drop de Tabelas
+-- Comentado para segurança
+/*
+	drop table if exists Registration;
+    drop table if exists FavoriteType;
+    drop table if exists Member;
+    drop table if exists Event;
+    drop table if exists EventType;
+*/
+
 -- Tabela Tipo de Evento
 Create Table EventType (
-	ID int primary key auto_increment,
-    Description varchar(100) not null
+	ID int not null AUTO_INCREMENT,
+    Description varchar(100) not null,
+    Primary key (ID)
 );
 
 -- Tabela Evento
 Create Table Event (
-	ID int primary key auto_increment,
+	ID int not null AUTO_INCREMENT,
     Type int not null,
     Description varchar(100) not null,
     Date date not null,
+    Primary key (ID),
     Foreign Key (Type) references EventType(ID) on delete restrict
 );
 
 -- Tabela Membro
 Create Table Member (
-	ID int primary key auto_increment,
-    Description varchar(100) not null
+	ID int not null AUTO_INCREMENT,
+    Description varchar(100) not null,
+    Primary key (ID)
 );
 
 -- Tabela Tipos Favoritos

@@ -934,7 +934,7 @@ class MemberManager extends ElementManager {
     }
 
     /**
-     * Abre a aba de criação ou edição de membro, caso seja recebido um parâmetro.
+     * Abre a aba de criação ou edição de membro, caso seja recebido um por parâmetro.
      * 
      * @param {Member} member - O membro a editar
      * @returns 

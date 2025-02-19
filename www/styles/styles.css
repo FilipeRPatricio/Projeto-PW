@@ -199,6 +199,8 @@ footer {
 }
 
 .modal-content {
+    display: flex;
+    flex-direction: column;
     background-color: #ccddff;
     padding: 2rem;
     border-radius: var(--root-border-radius);
@@ -211,6 +213,14 @@ footer {
     display: flex;
     justify-content: space-between;
     margin-top: var(--root-space);
+}
+
+#events-list {
+    text-align: center;
+    margin: auto;
+    width: 200px;
+    padding: 2px;
+    font-size: 13px;
 }
 
 #member-favorite-event-types {
