@@ -1,6 +1,6 @@
 "use strict";
 
-import { sendResponse, toNumber } from "../../connection/database.js";
+import { sendResponse, toNumber, dateToString } from "../../connection/database.js";
 
 const commandSelectAll = "select `id`, `type`, `description`, `date` from `Event` order by `id` ASC";
 const commandSelectId = "select `id`, `type`, `description`, `date` from `Event` where `id` = ?";
@@ -14,7 +14,12 @@ const commandSelectId = "select `id`, `type`, `description`, `date` from `Event`
 async function readEvents(request, response) {
     const id = toNumber(request.params.id);
     
-    await sendResponse(response, id === void 0 ? commandSelectAll : commandSelectId, id === void 0 ? [] : [id], (result) => result);
+    await sendResponse(response, id === void 0 ? commandSelectAll : commandSelectId, id === void 0 ? [] : [id], (result) => {
+        result.forEach((event) => {
+            event.date = dateToString(event.date);
+        });
+        return result;
+    });
 }
 
 const selectAutoIncrementCommand = "select `AUTO_INCREMENT` from information_schema.tables where table_schema = 'ESTSBike' and table_name = 'Event'";
