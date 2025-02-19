@@ -847,10 +847,14 @@ class MemberManager extends ElementManager {
      */
     createButtons() {
         this.#addAction("member-create", "click", async () => await this.openModal());
-        this.#addAction("saveMember", "click", async () => await this.saveMember());
-        this.#addAction("cancelMember", "click", () => this.closeModal());
+        this.#addAction("save-member", "click", async () => await this.saveMember());
+        this.#addAction("cancel-member", "click", () => this.closeModal());
         this.#addAction("member-edit", "click", async () => await this.editSelectedMember());
         this.#addAction("member-delete", "click", async () => await this.deleteSelectedMember());
+        this.#addAction("register-event", "click", async () => await this.openRegistrationModal());
+        this.#addAction("unregister-event", "click", async () => await this.openModal());
+        this.#addAction("accept-registration", "click", () => this.#acceptRegistration());
+        this.#addAction("cancel-registration", "click", () => this.#cancelRegistration());
     }
 
     /**
@@ -931,6 +935,45 @@ class MemberManager extends ElementManager {
         for (const oldType of removedTypes) {
             await fetchJSON("/favorites", "DELETE", { "member": memberId, "eventType": oldType.EventType });
         }
+    }
+
+    async openRegistrationModal() {
+        const modal = document.getElementById("create-member-modal");
+        modal?.classList.add("hidden");
+
+        const title = document.getElementById("registration-title");
+        title.textContent = "Inscrever em Evento";
+
+        const registrationDiv = document.getElementById("register-member");
+        registrationDiv?.classList.remove("hidden");
+
+        const eventsList = document.getElementById("events-list");
+    }
+
+    /**
+     * 
+     * @param {HTMLSelectElement} select 
+     */
+    async #createEventsList(select) {
+        
+    }
+
+    /**
+     * 
+     */
+    #acceptRegistration() {
+
+    }
+
+    /**
+     * Esconde o div de inscrição num evento e volta a mostrar o modal de edição.
+     */
+    #cancelRegistration() {
+        const modal = document.getElementById("create-member-modal");
+        modal?.classList.remove("hidden");
+
+        const registrationDiv = document.getElementById("register-member");
+        registrationDiv?.classList.add("hidden");
     }
 
     /**

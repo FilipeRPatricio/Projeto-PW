@@ -9,7 +9,7 @@ import updateType from "./routes/types/update-type.js";
 import deleteType from "./routes/types/delete-type.js";
 
 /* Eventos */
-
+import { readEvents, eventsAutoIncrement } from "./routes/events/read-events.js";
 
 /* Membros */
 import { readMembers, membersAutoIncrement } from "./routes/members/read-members.js";
@@ -44,7 +44,8 @@ app.put("/types/:id", updateType);
 app.delete("/types/:id", deleteType);
 
 // Routes para os eventos
-
+app.get("/events/auto-inc", eventsAutoIncrement);
+app.get("/events/:id?", readEvents);
 
 // Routes para os membros
 app.get("/members/auto-inc", membersAutoIncrement);
