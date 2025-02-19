@@ -492,6 +492,70 @@ class EventManager extends ElementManager {
     }
 
     /**
+     * Retorna todos os eventos.
+     * 
+     * @returns um array com todos os eventos
+     * @async
+     */
+    static async getEvents() {
+        let events = await fetchJSON("/events/all", "GET");
+
+        for (const event of events) {
+            event.type = await EventTypeManager.getTypeById(event.type);
+        }
+
+        return events;
+    }
+
+    /**
+     * Atualiza a tabela com os eventos da base de dados.
+     * 
+     * @async
+     */
+    static async updateEventsTable() {
+        const events = await EventManager.getEvents();
+
+        if (events) {
+            tableManager.updateTable(EventManager, events);
+        }
+    }
+
+    /**
+     * Retorna o evento com o id específicado.
+     * 
+     * @param {number} eventId - O id do evento a procurar
+     * @returns O evento com o id pedido
+     * @async
+     */
+    static async getEventById(eventId) {
+        let result = await fetchJSON(`/events/${eventId}`, "GET")
+        return result ? result[0] : void 0;
+    }
+
+    /**
+     * Retorna um array com os ids dos membros inscritos no evento com o id recebido.
+     * 
+     * @param {number} eventId - O id do evento a procurar
+     * @returns Um array com os ids dos membros inscritos no evento
+     * @async
+     */
+    // static async getRegisteredMembers(eventId) {
+    //     if (!eventId || isNaN(eventId)) { return; }
+
+    //     const registrations = await fetchJSON(`/registrations/event/${eventId}`, "GET");
+    //     let result = [];
+    //     console.log(result);
+
+    //     if (registrations) {
+    //         registrations.forEach((registration) => {
+    //             result.push(registration.Member);
+    //         });
+    //     }
+
+    //     return result;
+    // }
+
+    /**
      * Inicializa os botões e a tabela
      */
     init() {
@@ -502,7 +566,7 @@ class EventManager extends ElementManager {
         this.createEvent("Track", "Classic", "2025-5-22");
         this.createEvent("BMX", "Freestyle", "2025-2-13");
 
-        tableManager.updateTable(EventManager, EventManager.eventList);
+        EventManager.updateEventsTable();
     }
 
     /**
@@ -594,7 +658,7 @@ class EventManager extends ElementManager {
         }
     
         this.closeModal();
-        tableManager.updateTable(EventManager, EventManager.eventList);
+        EventManager.updateEventsTable();
     }
 
     /**
@@ -739,7 +803,7 @@ class EventManager extends ElementManager {
             }
 
             alert("Evento apagado com sucesso!");
-            tableManager.updateTable(EventManager, EventManager.eventList);
+            EventManager.updateEventsTable();
         } catch (error) {
             console.error("Erro no frontend:", error);
             alert("Erro ao apagar evento.");
@@ -801,12 +865,22 @@ class MemberManager extends ElementManager {
     }
 
     /**
+     * Retorna todos os membros.
+     * 
+     * @returns um array com todos os membros
+     * @async
+     */
+    static async getMembers() {
+        return await fetchJSON("/members/all", "GET");
+    }
+
+    /**
      * Atualiza a tabela com os membros da base de dados.
      * 
      * @async
      */
     static async updateMembersTable() {
-        const members = await fetchJSON("/members/all", "GET");
+        const members = await MemberManager.getMembers();
 
         if (members) {
             tableManager.updateTable(MemberManager, members);
@@ -855,6 +929,56 @@ class MemberManager extends ElementManager {
     }
 
     /**
+     * Retorna uma lista com os eventos em que o membro com o id pedido está inscrito.
+     * 
+     * @param {number} memberId - Id do membro a procurar
+     * @returns Um array com os ids dos eventos inscritos
+     * @async
+     */
+    async getRegisteredEvents(memberId) {
+        if (!memberId || isNaN(memberId)) { return; }
+
+        const registeredEvents = await fetchJSON(`/registrations/${memberId}`, "GET") || [];
+        let result = [];
+
+        for (const reg of registeredEvents) {
+            result.push(await EventManager.getEventById(reg.Event));
+        }
+
+        return result;
+    }
+
+    /**
+     * Retorna os eventos em que o membro com o id pedido não está inscrito.
+     * i.e. A diferença entre todos os eventos e os eventos inscritos.
+     * 
+     * @param {number} memberId - Id do membro a procurar
+     * @returns Um array com os eventos não inscritos
+     */
+    async getUnregisteredEvents(memberId) {
+        const registered = await this.getRegisteredEvents(memberId);
+        const allEvents = await EventManager.getEvents();
+
+        let result = allEvents.filter(
+            ev => !registered.some(event => event.id === ev.id)
+        );
+
+        return result || [];
+    }
+
+    /**
+     * Retorna se um membro está inscrito num evento.
+     * 
+     * @param {number} memberId - O id do membro a procurar
+     * @param {number} eventId - O id do evento a procurar
+     * @returns true se estiver inscrito, false caso contrário
+     */
+    async memberIsRegisteredInEvent(memberId, eventId) {
+        const registeredEvents = await this.getRegisteredEvents(memberId);
+        return registeredEvents && registeredEvents.some(reg => reg.id == eventId);
+    }
+
+    /**
      * Inicializa os botões e a tabela.
      */
     init() {
@@ -867,14 +991,14 @@ class MemberManager extends ElementManager {
      * Inicializa as ações dos botões de criar, editar, apagar, guardar e cancelar.
      */
     createButtons() {
-        this.#addAction("member-create", "click", async () => await this.openModal());
-        this.#addAction("save-member", "click", async () => await this.saveMember());
+        this.#addAction("member-create", "click", async () => this.openModal());
+        this.#addAction("save-member", "click", async () => this.saveMember());
         this.#addAction("cancel-member", "click", () => this.closeModal());
-        this.#addAction("member-edit", "click", async () => await this.editSelectedMember());
-        this.#addAction("member-delete", "click", async () => await this.deleteSelectedMember());
-        this.#addAction("register-event", "click", async () => await this.openRegistrationModal());
-        this.#addAction("unregister-event", "click", async () => await this.openModal());
-        this.#addAction("accept-registration", "click", () => this.#acceptRegistration());
+        this.#addAction("member-edit", "click", async () => this.editSelectedMember());
+        this.#addAction("member-delete", "click", async () => this.deleteSelectedMember());
+        this.#addAction("register-event", "click", async () => this.openRegistrationModal(true));
+        this.#addAction("unregister-event", "click", async () => this.openRegistrationModal(false));
+        this.#addAction("accept-registration", "click", async () => this.#acceptRegistration());
         this.#addAction("cancel-registration", "click", () => this.#cancelRegistration());
     }
 
@@ -958,32 +1082,101 @@ class MemberManager extends ElementManager {
         }
     }
 
-    async openRegistrationModal() {
+    /**
+     * Abre o modal de inscrição em eventos e faz update à lista de eventos
+     * dependendo se é para inscrever ou desinscrever.
+     * 
+     * @param {boolean} register - true se for para inscrever, false caso contrário
+     * @async
+     */
+    async openRegistrationModal(register = true) {
         const modal = document.getElementById("create-member-modal");
         modal?.classList.add("hidden");
 
         const title = document.getElementById("registration-title");
-        title.textContent = "Inscrever em Evento";
+        register ?
+        title.textContent = "Inscrever em Evento" :
+        title.textContent = "Desinscrever em Evento";
 
         const registrationDiv = document.getElementById("register-member");
         registrationDiv?.classList.remove("hidden");
 
-        const eventsList = document.getElementById("events-list");
+        await this.#createEventsList(register);
     }
 
     /**
+     * Cria a lista de opções e mostra-a na drop down list de eventos.
      * 
-     * @param {HTMLSelectElement} select 
+     * @param {boolean} register - true se for para inscrever, false caso contrário
+     * @async
      */
-    async #createEventsList(select) {
+    async #createEventsList(register) {
+        const eventsDropDownList = document.getElementById("events-list");
+        eventsDropDownList.replaceChildren();
+
+        // Lista de eventos a mostrar
+        const eventList = await this.#getRegistrationList(register);
+
+        // Elemento placeholder com valor 0
+        let placeholder = document.createElement("option");
+        placeholder.textContent = "Escolha um Evento: ";
+        placeholder.value = 0;
+        eventsDropDownList.appendChild(placeholder);
+
+        for (const event of eventList) {
+            eventsDropDownList.appendChild(this.#createDropDownOption(event));
+        }
+    }
+
+    /**
+     * Cria uma opção para a drop down list com a descrição do evento recebido.
+     * 
+     * @param {Events} event - evento para criar a opção
+     * @returns um elemento html option com a descrição do evento
+     */
+    #createDropDownOption(event) {
+        let result = document.createElement("option");
+        result.textContent = event.description;
+        result.value = event.id;
+        return result;
+    }
+
+    /**
+     * Retorna a lista com os eventos a mostrar na drop down list,
+     * dependendo se for para inscrever ou desinscrever um membro.
+     * 
+     * @param {boolean} register - true se for para inscrever, false caso contrário
+     * @returns Um array com os eventos a mostrar
+     * @async
+     */
+    async #getRegistrationList(register) {
+        let eventList;
+
+        const id = document.getElementById("member-id")?.value;
         
+        id && register ?
+        eventList = await this.getUnregisteredEvents(id) :
+        eventList = await this.getRegisteredEvents(id)
+
+        return eventList || [];
     }
 
     /**
-     * 
+     * Aceita e cria ou apaga uma inscrição num evento consoante se ela já existe ou não.
      */
-    #acceptRegistration() {
+    async #acceptRegistration() {
+        const eventId = document.getElementById("events-list")?.value;
+        const memberId = document.getElementById("member-id")?.value;
 
+        if (!eventId || Number(eventId) === 0 || !memberId) { return; }
+
+        if (await this.memberIsRegisteredInEvent(memberId, eventId)) {
+            await fetchJSON("/registrations", "DELETE", { "event": eventId, "member": memberId});
+            await this.#createEventsList(false);
+        } else {
+            await fetchJSON("/registrations", "POST", { "event": eventId, "member": memberId});
+            await this.#createEventsList(true);
+        }
     }
 
     /**
@@ -1115,6 +1308,9 @@ class MemberManager extends ElementManager {
     async deleteMember(id) {
         await fetchJSON(`/members/${id}`, "DELETE");
     }
+
+
+
 
     /**
      * Verifica se um dos membros geridos tem, como favorito, o tipo de evento recebido.
@@ -1348,7 +1544,7 @@ class TableManager {
         // Array para iterar sobre cada parâmetro
         let elementValues;
 
-        element instanceof Events ?
+        element.type && element.date ?
             elementValues = [element.id, element.type.description, element.description, dateToString(element.date)] :
             elementValues = [element.id, element.description];
 
@@ -1422,7 +1618,7 @@ function navigateTo(pageId) {
             EventTypeManager.updateTypesTable();
             break;
         case "Events":
-            tableManager.updateTable(EventManager, EventManager.eventList);
+            EventManager.updateEventsTable();
             break;
         case "Members":
             MemberManager.updateMembersTable();
@@ -1487,4 +1683,6 @@ window.onload = function () {
     const eventTypeManager = new EventTypeManager();
     const eventManager = new EventManager();
     const memberManager = new MemberManager(new CheckboxManager("member-favorite-event-types"));
+
+    EventManager.updateEventsTable();
 }
