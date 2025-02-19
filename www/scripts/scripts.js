@@ -619,9 +619,30 @@ class EventManager extends ElementManager {
      * 
      * @param {number} id - O id do evento a apagar
      */
-    deleteEvent(id) {
-        EventManager.eventList = EventManager.eventList.filter(ev => ev.id !== id);
+    async deleteEvent(id) {
+
+        const selectedID = tableManager.getSelectedElementID();
+        if (selectedID < 0) {
+            alert("Selecione um evento.");
+            return;
+        }
+
+        const confirmed = confirm("Deseja mesmo apagar este evento?");
+        if (confirmed) {
+            await this.deleteEvent(selectedID);
+            MemberManager.updateMembersTable();
+        }
     }
+
+    /**
+     * Apaga um membro do clube a partir do seu id.
+     * 
+     * @param {number} id - O id do membro a apagar
+     * @async
+     */
+    async deleteEvent(id) {
+        await fetchJSON(`/events/${id}`, "DELETE");
+    }   
 
 
     /**

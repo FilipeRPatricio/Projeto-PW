@@ -10,6 +10,9 @@ import deleteType from "./routes/types/delete-type.js";
 
 /* Eventos */
 import { readEvents, eventsAutoIncrement } from "./routes/events/read-events.js";
+import createEvent from "./routes/events/create-events.js";
+import updateEvent from "./routes/events/update-events.js";
+import deleteEvent from "./routes/events/delete-events.js";
 
 /* Membros */
 import { readMembers, membersAutoIncrement } from "./routes/members/read-members.js";
@@ -46,6 +49,10 @@ app.delete("/types/:id", deleteType);
 // Routes para os eventos
 app.get("/events/auto-inc", eventsAutoIncrement);
 app.get("/events/:id?", readEvents);
+app.post("/events", createEvent);
+app.delete("/events/:id", deleteEvent);
+app.put("/events/:id", updateEvent);
+
 
 // Routes para os membros
 app.get("/members/auto-inc", membersAutoIncrement);
