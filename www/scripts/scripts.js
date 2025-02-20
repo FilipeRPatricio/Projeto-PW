@@ -604,8 +604,7 @@ class EventManager extends ElementManager {
             this.editSelectedEvent();
         });
 
-        this.deleteButton.addEventListener("click", (e) => {
-            e.preventDefault();
+        this.deleteButton.addEventListener("click", () => {
             this.deleteSelectedEvent();
         });
     }
@@ -793,10 +792,9 @@ class EventManager extends ElementManager {
         }
 
         try {
-            const response = await fetch(`http://localhost:5502/api/events/${selectedID}`, {
-                method: "DELETE",
-                headers:{"Content-Type": "application/json"}
-            });
+
+            const response = await fetchJSON(`/events/${selectedID}`, 'DELETE')
+            console.log(response);
         
             if(!response.ok) {
                 throw new Error("Erro ao apagar evento");
@@ -1253,7 +1251,6 @@ class MemberManager extends ElementManager {
     
         if (await MemberManager.getMemberById(id)) {
             await this.editMember(id, description, checkedTypes);
-            console.log()
         } else {
             await this.createMember(description, checkedTypes);
         }

@@ -1,6 +1,6 @@
 "use strict";
 
-import { sendResponse, sendError} from "../../connection/database.js";
+import { sendResponse, sendError, toNumber} from "../../connection/database.js";
 
 const deleteEventCommand = "delete from `Event` where `id` = ?";
 
@@ -11,7 +11,7 @@ const deleteEventCommand = "delete from `Event` where `id` = ?";
  * @param {*} response 
  */
 export default async function deleteEvent(request, response) {
-    
+    let id = toNumber(request.params.id);
     if (id) {
         await sendResponse(response, deleteEventCommand, [id], (result) => result);
     } else {
