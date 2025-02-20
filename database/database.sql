@@ -25,7 +25,7 @@ Create Table EventType (
 -- Tabela Evento
 Create Table Event (
 	ID int not null AUTO_INCREMENT,
-    Type int not null,
+    Type int unique not null,
     Description varchar(100) not null,
     Date date not null,
     Primary key (ID),

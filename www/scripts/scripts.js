@@ -1,9 +1,6 @@
 "use strict";
 
 /*
-    TODO: Drop-down list de tipos de eventos ao criar evento;
-    TODO: Inscrever e Desinscrever membro num evento.
-    TODO: Mudar forma como os alerts são mostrados para diminuir o nº de clicks
     TODO: Verificações extra: i.e. datas que já passaram, tipos de eventos que já existem
 */
 
@@ -444,15 +441,16 @@ class EventTypeManager extends ElementManager {
                 const confirmed = confirm("Tem a certeza que deseja apagar este tipo de evento?");
                 if (!confirmed) {return;}
 
-                if (EventManager.hasEventWithType(selectedID)) {
+                if (await EventManager.hasEventWithType(selectedID)) {
                     alert("Não pode apagar o Tipo de Evento, pois é utilizado num Evento!");
                     return;
                 }
 
-                if (MemberManager.hasMemberWithFavorite(selectedID)) {
+                if (await MemberManager.hasMemberWithFavorite(selectedID)) {
                     alert("Não pode apagar o Tipo de Evento, pois é o favorito de um Membro!");
                     return;
                 }
+
 
                 await fetchJSON(`/types/${selectedID}`, "DELETE");
                 EventTypeManager.updateTypesTable();
@@ -507,29 +505,34 @@ class EventManager extends ElementManager {
         return events;
     }
 
-    async #createEventsTypeList(event) {
-        const eventsDropDownList = document.getElementById("events-type-list");
+    /**
+     * Cria a lista de tipos de eventos para o modal dos eventos.
+     * 
+     * @param {Events} event - O evento a editar, ou null por default
+     */
+    async #createEventsTypeList(event = null) {
+        const typesDropDownList = document.getElementById("events-type-list");
 
-        // Lista de eventos a mostrar
-        const eventList = await EventTypeManager.getTypes()
+        // Lista de tipos a mostrar
+        const typeList = await EventTypeManager.getTypes();
 
         // Elemento placeholder com valor 0
-        if(!event){
+        if (!event) {
             let placeholder = document.createElement("option");
-            placeholder.textContent = "Escolha um Evento: ";
+            placeholder.textContent = "Escolha um Tipo: ";
             placeholder.value = 0;
-            eventsDropDownList.appendChild(placeholder);
+            typesDropDownList.appendChild(placeholder);
         }
 
-        for (const typeOfEvent of eventList) {
+        for (const typeOfEvent of typeList) {
 
-            let eventType = document.createElement('option')
-            eventType.textContent = typeOfEvent.description
-            eventType.value = typeOfEvent.id
+            let eventType = document.createElement("option");
+            eventType.textContent = typeOfEvent.description;
+            eventType.value = typeOfEvent.id;
             
-            if( event?.type === typeOfEvent.id) eventType.setAttribute("selected", true)   // "?" para se tiver algo undefined
+            if (event?.type === typeOfEvent.id) eventType.setAttribute("selected", true);   // "?" para se tiver algo undefined
 
-            eventsDropDownList.appendChild(eventType);
+            typesDropDownList.appendChild(eventType);
         }
     }
 
@@ -780,7 +783,6 @@ class EventManager extends ElementManager {
     
         if (await EventManager.getEventById(eventId)) {
             const existingEvent = await this.editEvent(eventId, eventType, description, date);
-            console.log(existingEvent);
             await fetchJSON(`/events/${eventId}`, "PUT", existingEvent);
         } else {
             await this.createEvent(eventType, description, date);
@@ -822,20 +824,18 @@ class EventManager extends ElementManager {
         await fetchJSON(`/events/${id}`, "DELETE");
     }
     
-
-
-    static getEventsWithTypes(...types) {
-        return EventManager.eventList.filter(e => types.includes(e.type));
-    }
-
     /**
      * Verifica se algum Evento é do Tipo recebido.
      * 
      * @param {number} typeId - O id do Tipo de Evento a procurar
      * @returns true se existir pelo menos um Evento do Tipo recebido, false caso contrário
+     * @static
+     * @async
      */
-    static hasEventWithType(typeId) {
-        return EventManager.eventList.some(e => e.type === EventTypeManager.getTypeById(typeId));
+    static async hasEventWithType(typeId) {
+        const events = await EventManager.getEvents();
+        const receivedType = await EventTypeManager.getTypeById(typeId);
+        return events && receivedType && events?.some(e => e.type.id === receivedType.id);
     }
 }
 
@@ -992,6 +992,19 @@ class MemberManager extends ElementManager {
     }
 
     /**
+     * Verifica se algum membro tem, como favorito, o tipo de evento recebido.
+     * 
+     * @param {number} typeId - O id do tipo de evento a procurar
+     * @returns true se existir pelo menos um membro com o tipo recebido como favorito, false caso contrário
+     * @static
+     * @async
+     */
+    static async hasMemberWithFavorite(typeId) {
+        const favorites = await fetchJSON(`/favorites/type/${typeId}`, "GET");
+        return favorites && favorites.some(f => f.EventType == typeId);
+    }
+
+    /**
      * Inicializa os botões e a tabela.
      */
     init() {
@@ -1103,13 +1116,11 @@ class MemberManager extends ElementManager {
      * @async
      */
     async openRegistrationModal(register = true) {
+        const title = document.getElementById("registration-title");
+        title.textContent = register ? "Inscrever em Evento" : "Desinscrever em Evento";
+        
         const modal = document.getElementById("create-member-modal");
         modal?.classList.add("hidden");
-
-        const title = document.getElementById("registration-title");
-        register ?
-        title.textContent = "Inscrever em Evento" :
-        title.textContent = "Desinscrever em Evento";
 
         const registrationDiv = document.getElementById("register-member");
         registrationDiv?.classList.remove("hidden");
@@ -1313,27 +1324,6 @@ class MemberManager extends ElementManager {
      */
     async deleteMember(id) {
         await fetchJSON(`/members/${id}`, "DELETE");
-    }
-
-
-
-
-    /**
-     * Verifica se um dos membros geridos tem, como favorito, o tipo de evento recebido.
-     * 
-     * @param {number} type - O id do tipo de evento a procurar
-     */
-    static hasMemberWithFavorite(type) {
-        return MemberManager.memberList.some(m => m.likesThisEventType(type));
-    }
-
-    /**
-     * Verifica se um dos membros geridos está inscrito no evento recebido.
-     * 
-     * @param {number} event - O id do evento a procurar
-     */
-    static hasMemberInEvent(event) {
-        return MemberManager.memberList.some(m => m.isRegisteredInEvent(event));
     }
 }
 
