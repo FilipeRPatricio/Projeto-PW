@@ -533,6 +533,34 @@ class EventManager extends ElementManager {
     }
 
     /**
+     * Retorna o número atual do auto_increment dos eventos.
+     * 
+     * @returns O próximo id para os eventos
+     * @async
+     */
+    async getAutoIncrementId() {
+        const result = await fetchJSON("/events/auto-inc", "GET");
+        return result[0].AUTO_INCREMENT;
+    }
+
+    /**
+     * Procura e retorna o evento que está selecionado na tabela.
+     * 
+     * @returns O evento selecionado
+     * @async
+     */
+    async getSelectedEvent() {
+        const selectedID = tableManager.getSelectedElementID();
+        let result;
+
+        selectedID > 0
+        ? result = await fetchJSON(`/events/${selectedID}`, "GET")
+        : alert("Por favor, selecione um evento antes de editar.");
+
+        return result;
+    }
+
+    /**
      * Retorna um array com os membros inscritos no evento com o id recebido.
      * 
      * @param {number} eventId - O id do evento a procurar
@@ -569,12 +597,6 @@ class EventManager extends ElementManager {
      */
     init() {
         this.initializeButtons();
-
-        // Valores Default para Testes
-        this.createEvent("BTT", "Mountain Biking", "2025-7-14");
-        this.createEvent("Track", "Classic", "2025-5-22");
-        this.createEvent("BMX", "Freestyle", "2025-2-13");
-
         EventManager.updateEventsTable();
     }
 
@@ -597,11 +619,11 @@ class EventManager extends ElementManager {
      * Adiciona as ações ao clicar num dos botões.
      */
     setActions() {
-        this.createButton.addEventListener("click", () => {
+        this.createButton.addEventListener("click", async () => {
             this.openModal();
         });
 
-        this.saveButton.addEventListener("click", () => {
+        this.saveButton.addEventListener("click", async () => {
             this.saveEvent();
         });
 
@@ -609,115 +631,14 @@ class EventManager extends ElementManager {
             this.closeModal();
         });
 
-        this.editButton.addEventListener("click", () => {
+        this.editButton.addEventListener("click", async () => {
             this.editSelectedEvent();
         });
 
-        this.deleteButton.addEventListener("click", () => {
+        this.deleteButton.addEventListener("click", async () => {
             this.deleteSelectedEvent();
         });
     }
-
-    /**
-     * Cria um novo evento e adiciona-o à lista.
-     * 
-     * @param {string} type - O tipo do evento
-     * @param {string} description - A descrição do evento
-     * @param {Date | string} date - A data do evento
-     * @returns 
-     * @async
-     */
-    async createEvent(type, description, date) {
-        // Encontra o tipo de evento com a mesma descrição
-        const eventType = await EventTypeManager.getTypeByDescription(type);
-        if (!eventType) {
-            alert("Tipo de evento não encontrado.")
-            return;
-        }
-
-        if (!(date instanceof Date)) {
-            date = new Date(date);
-        }
-
-        EventManager.eventList.push(new Events(EventManager.currentId++, eventType, description, date));
-    }
-
-    /**
-     * Cria um novo evento com os dados inseridos.
-     * 
-     * @returns 
-     */
-    saveEvent() {
-        const type = document.getElementById("event-type").value;
-        const description = document.getElementById("event-description").value;
-        const date = document.getElementById("event-date").value;
-
-        if (!type || !description || !date) {
-            alert("Insira parâmetros válidos.");
-            return;
-        }
-
-        const eventId = parseInt(document.getElementById("event-id")?.value);
-    
-        if (EventManager.eventList.some(event => event.id === eventId)) {
-            this.editEvent(eventId, type, description, date);
-        } else {
-            this.createEvent(type, description, date);
-        }
-    
-        this.closeModal();
-        EventManager.updateEventsTable();
-    }
-
-    /**
-     * Edita um evento a partir do seu id.
-     * 
-     * @param {number} id - O id do evento a editar
-     * @param {EventType} type - O novo tipo do evento
-     * @param {string} description - A nova descrição do evento
-     * @param {Date | string} date - A nova data do evento
-     */
-    editEvent(id, type, description, date) {
-        const event = EventManager.eventList.find(ev => ev.id === id);
-        if (event) {
-            event.type = type;
-            event.description = description;
-            event.date = date;
-        }
-    }
-
-    /**
-     * Apaga um evento a partir do seu id.
-     */
-    async deleteSelectedEvent() {
-        const selectedID = tableManager.getSelectedElementID();
-        if (selectedID < 0) {
-            alert("Selecione um evento.");
-            return;
-        }
-
-        if (await EventManager.eventHasMembersRegistered()) {
-            alert("Erro, evento tem membros inscritos.");
-            return;
-        }
-
-        const confirmed = confirm("Deseja mesmo apagar este evento?");
-        if (confirmed) {
-            await this.deleteEvent(selectedID);
-            MemberManager.updateMembersTable();
-        }
-    }
-
-    /**
-     * Apaga um evento a partir do seu id.
-     * 
-     * @param {number} id - O id do evento a apagar
-     * @async
-     */
-    async deleteEvent(id) {
-        await fetchJSON(`/events/${id}`, "DELETE");
-    }
-
 
     /**
      * Abre a aba para criar eventos, ou editar caso seja recebido um.
@@ -725,27 +646,26 @@ class EventManager extends ElementManager {
      * @param {Events} event - O evento a editar
      * @returns 
      */
-    openModal(event = null) {
-        const modal = document.getElementById("event-modal");
-        if (!modal) {
-            return;
-        }
-
-        modal.classList.remove("hidden");
+    async openModal(event = null) {
 
         const id = document.getElementById("event-id");
         const type = document.getElementById("event-type");
         const description = document.getElementById("event-description");
         const date = document.getElementById("event-date");
 
+        if (!id || !type || !description || !date) { return; }
+
         if (event) {
             id.value = event.id;
-            type.value = event.type.description || event.type;
+            const existingType = await EventTypeManager.getTypeById(event.type);
+            type.value = existingType?.description;
             description.value = event.description;
             date.value = dateToString(event.date);
         } else {
-            id.value = EventManager.currentId;
+            id.value = await this.getAutoIncrementId();
         }
+
+        document.getElementById("event-modal")?.classList.remove("hidden");
     }
 
     /**
@@ -766,26 +686,90 @@ class EventManager extends ElementManager {
     }
 
     /**
+     * Cria um novo evento e adiciona-o à lista.
+     * 
+     * @param {string} type - O tipo do evento
+     * @param {string} description - A descrição do evento
+     * @param {Date | string} date - A data do evento
+     * @returns 
+     * @async
+     */
+    async createEvent(type, description, date) {
+        const eventType = await EventTypeManager.getTypeByDescription(type);
+        if (!eventType) {
+            alert("Tipo de evento não encontrado.")
+            return;
+        }
+
+        await fetchJSON("/events", "POST", { "type": eventType.id, "description": description, "date": date });
+    }
+
+    /**
+     * Edita um evento a partir do seu id.
+     * 
+     * @param {number} id - O id do evento a editar
+     * @param {number} type - O id do novo tipo de evento
+     * @param {string} description - A nova descrição do evento
+     * @param {Date | string} date - A nova data do evento
+     */
+    async editEvent(id, type, description, date) {
+        const event = await EventManager.getEventById(id);
+        if (event) {
+            event.type = type;
+            event.description = description;
+            event.date = date;
+        }
+        return event;
+    }
+
+    /**
      * Edita o evento selecionado.
      * 
      * @returns 
      */
-    editSelectedEvent() {
-        const selectedID = tableManager.getSelectedElementID();
-        if (selectedID < 0) {
-            alert("Selecione um membro.");
-            return;
-        }
-
-        const event = EventManager.eventList.find(ev => ev.id === selectedID);
-        if (event) this.openModal(event);
+    async editSelectedEvent() {
+        const event = await this.getSelectedEvent();
+        if (event) this.openModal(event[0]);
     }
 
     /**
-     * Apaga o evento selecionado.
+     * Cria um novo evento com os dados inseridos.
      * 
      * @returns 
-     * @async
+     */
+    async saveEvent() {
+        const typeDescription = document.getElementById("event-type").value;
+        const description = document.getElementById("event-description").value;
+        const date = document.getElementById("event-date").value;
+
+        if (!typeDescription || !description || !date) {
+            alert("Insira parâmetros válidos.");
+            return;
+        }
+
+        const type = await EventTypeManager.getTypeByDescription(typeDescription);
+
+        if (!type) {
+            alert("Tipo de evento não existe.");
+            return;
+        }
+
+        const eventId = parseInt(document.getElementById("event-id")?.value);
+    
+        if (await EventManager.getEventById(eventId)) {
+            const existingEvent = await this.editEvent(eventId, type.id, description, date);
+            console.log(existingEvent);
+            await fetchJSON(`/events/${eventId}`, "PUT", existingEvent);
+        } else {
+            await this.createEvent(type, description, date);
+        }
+    
+        this.closeModal();
+        EventManager.updateEventsTable();
+    }
+
+    /**
+     * Apaga um evento a partir do seu id.
      */
     async deleteSelectedEvent() {
         const selectedID = tableManager.getSelectedElementID();
@@ -794,32 +778,30 @@ class EventManager extends ElementManager {
             return;
         }
 
-        const confirmed = confirm("Deseja mesmo apagar este evento?");
-        if (!confirmed) {return;}
-
-        if (MemberManager.hasMemberInEvent(selectedID)) {
-            alert("Não pode apagar o Evento, pois tem Membros inscritos!");
+        if (await EventManager.eventHasMembersRegistered()) {
+            alert("Erro, evento tem membros inscritos.");
             return;
         }
 
-        try {
-
-            const response = await fetchJSON(`/events/${selectedID}`, 'DELETE')
-            console.log(response);
-        
-            if(!response.ok) {
-                throw new Error("Erro ao apagar evento");
-            }
-
-            alert("Evento apagado com sucesso!");
+        const confirmed = confirm("Deseja mesmo apagar este evento?");
+        if (confirmed) {
+            await this.deleteEvent(selectedID);
             EventManager.updateEventsTable();
-        } catch (error) {
-            console.error("Erro no frontend:", error);
-            alert("Erro ao apagar evento.");
         }
     }
 
+    /**
+     * Apaga um evento a partir do seu id.
+     * 
+     * @param {number} id - O id do evento a apagar
+     * @async
+     */
+    async deleteEvent(id) {
+        await fetchJSON(`/events/${id}`, "DELETE");
+    }
     
+
+
     static getEventsWithTypes(...types) {
         return EventManager.eventList.filter(e => types.includes(e.type));
     }
@@ -951,7 +933,7 @@ class MemberManager extends ElementManager {
         let result = [];
 
         for (const reg of registeredEvents) {
-            result.push(await EventManager.getMemberById(reg.Event));
+            result.push(await EventManager.getEventById(reg.Event));
         }
 
         return result;
@@ -1277,12 +1259,6 @@ class MemberManager extends ElementManager {
      * @async
      */
     async editSelectedMember() {
-        const selectedID = tableManager.getSelectedElementID();
-        if (selectedID < 0) {
-            alert("Selecione um membro.");
-            return;
-        }
-
         const member = await this.getSelectedMember();
         if (member) await this.openModal(member[0]);
     }

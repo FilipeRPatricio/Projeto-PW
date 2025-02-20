@@ -82,7 +82,7 @@ function toString(string) {
  * @returns uma data ou undefined, caso a date não seja válida
  */
 function toDate(date) {
-    newDate = new Date(date);
+    const newDate = new Date(date);
     return newDate ? newDate : void 0;
  }
 
