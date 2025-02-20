@@ -103,4 +103,4 @@ function toDate(date) {
     return date ? `${date.getFullYear()}-${month}-${day}` : void 0;
  }
 
-export { execute, sendResponse, sendError, toNumber, toString, toDate, dateToString };
+export { sendResponse, sendError, toNumber, toString, toDate, dateToString };

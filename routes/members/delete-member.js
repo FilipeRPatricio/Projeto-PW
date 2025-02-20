@@ -1,21 +1,21 @@
-//Endpoint da API
 "use strict";
-import express from "express";
-import { execute } from "../../connection/database.js";
 
-const router = express.Router();
+import { sendResponse, sendError, toNumber } from "../../connection/database.js";
 
-//Apagar evento por ID
-router.delete("/members/:id", async (req, res) => {       
-    const { id } = req.params; 
-    try {
-        console.log(`Recebido pedido para apagar membro com ID: ${id}`);
-        await execute("DELETE FROM member WHERE ID = ?", [id]); 
-        res.status(200).json({ message: "Membro apagado com sucesso!" });
-    } catch (error) {
-        console.error("Erro ao apagar membro:", error);
-        res.status(500).json({ message: "Erro ao apagar membro." });
+const deleteMemberCommand = "delete from `Member` where `id` = ?";
+
+/**
+ * Apaga o membro com o id pedido.
+ * 
+ * @param {*} request 
+ * @param {*} response 
+ */
+export default async function deleteMember(request, response) {
+    const id = toNumber(request.params.id);
+
+    if (id) {
+        await sendResponse(response, deleteMemberCommand, [id], (result) => result);
+    } else {
+        sendError(response, 500, "Erro, id não encontrado")
     }
-});
-
-export default router;
+}
