@@ -50,16 +50,15 @@ app.delete("/types/:id", deleteType);
 app.get("/events/auto-inc", eventsAutoIncrement);
 app.get("/events/:id?", readEvents);
 app.post("/events", createEvent);
-app.delete("/events/:id", deleteEvent);
 app.put("/events/:id", updateEvent);
-
+app.delete("/events/:id", deleteEvent);
 
 // Routes para os membros
 app.get("/members/auto-inc", membersAutoIncrement);
 app.get("/members/:id?", readMembers);
 app.post("/members", createMember);
 app.put("/members/:id", updateMember);
-app.delete("members/:id", deleteMember);      // Rever
+app.delete("/members/:id", deleteMember);
 
 // Routes para os tipos de eventos favoritos
 app.get("/favorites", readFavorites);
