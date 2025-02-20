@@ -613,8 +613,7 @@ class EventManager extends ElementManager {
             this.editSelectedEvent();
         });
 
-        this.deleteButton.addEventListener("click", (e) => {
-            e.preventDefault();
+        this.deleteButton.addEventListener("click", () => {
             this.deleteSelectedEvent();
         });
     }
@@ -781,6 +780,45 @@ class EventManager extends ElementManager {
         const event = EventManager.eventList.find(ev => ev.id === selectedID);
         if (event) this.openModal(event);
     }
+
+    /**
+     * Apaga o evento selecionado.
+     * 
+     * @returns 
+     * @async
+     */
+    async deleteSelectedEvent() {
+        const selectedID = tableManager.getSelectedElementID();
+        if (selectedID < 0) {
+            alert("Selecione um evento.");
+            return;
+        }
+
+        const confirmed = confirm("Deseja mesmo apagar este evento?");
+        if (!confirmed) {return;}
+
+        if (MemberManager.hasMemberInEvent(selectedID)) {
+            alert("Não pode apagar o Evento, pois tem Membros inscritos!");
+            return;
+        }
+
+        try {
+
+            const response = await fetchJSON(`/events/${selectedID}`, 'DELETE')
+            console.log(response);
+        
+            if(!response.ok) {
+                throw new Error("Erro ao apagar evento");
+            }
+
+            alert("Evento apagado com sucesso!");
+            EventManager.updateEventsTable();
+        } catch (error) {
+            console.error("Erro no frontend:", error);
+            alert("Erro ao apagar evento.");
+        }
+    }
+
     
     static getEventsWithTypes(...types) {
         return EventManager.eventList.filter(e => types.includes(e.type));
@@ -1224,7 +1262,6 @@ class MemberManager extends ElementManager {
     
         if (await MemberManager.getMemberById(id)) {
             await this.editMember(id, description, checkedTypes);
-            console.log()
         } else {
             await this.createMember(description, checkedTypes);
         }
