@@ -7,8 +7,8 @@ const deleteTypeCommand = "delete from `EventType` where `id` = ?";
 /**
  * Apaga o tipo de evento com o id pedido.
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP
  */
 export default async function deleteType(request, response) {
     const id = toNumber(request.params.id);

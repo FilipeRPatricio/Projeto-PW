@@ -8,8 +8,8 @@ const commandSelectId = "select `id`, `type`, `description`, `date` from `Event`
 /**
  * Mostra todos os eventos ou o evento cujo id foi pedido. 
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP
  */
 async function readEvents(request, response) {
     const id = toNumber(request.params.id);
@@ -27,8 +27,8 @@ const selectAutoIncrementCommand = "select `AUTO_INCREMENT` from information_sch
 /**
  * Mostra o id atual do auto_increment da tabela Event.
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP
  */
 async function eventsAutoIncrement(request, response) {
     await sendResponse(response, selectAutoIncrementCommand, [], (result) => result);

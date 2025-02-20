@@ -9,8 +9,8 @@ const commandSelectEventId = "select `Event`, `Member` from `Registration` where
 /**
  * Mostra todas as inscrições de membros em eventos.
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP
  */
 async function readRegistrations(request, response) {
     await sendResponse(response, commandSelectAll, [], (result) => result);
@@ -19,8 +19,8 @@ async function readRegistrations(request, response) {
 /**
  * Mostra os tipos de eventos favoritos de um membro cujo id foi pedido.
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP
  */
 async function readMemberRegistrations(request, response) {
     const member = toNumber(request.params.member);
@@ -36,8 +36,8 @@ async function readMemberRegistrations(request, response) {
 /**
  * Mostra todos os membros inscritos num evento cujo id foi pedido.
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP 
  */
 async function readEventRegistrations(request, response) {
     const event = toNumber(request.params.event);

@@ -9,8 +9,8 @@ const commandSelectTypeId = "select `Member`, `EventType` from `FavoriteType` wh
 /**
  * Mostra todos os tipos de eventos favoritos.
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP
  */
 async function readFavorites(request, response) {
     await sendResponse(response, commandSelectAll, [], (result) => result);
@@ -19,8 +19,8 @@ async function readFavorites(request, response) {
 /**
  * Mostra os tipos de eventos favoritos de um membro cujo id foi pedido.
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP
  */
 async function readFavoritesOfMember(request, response) {
     const member = toNumber(request.params.member);
@@ -35,8 +35,8 @@ async function readFavoritesOfMember(request, response) {
 /**
  * Mostra os tipos de eventos favoritos com um tipo cujo id foi pedido.
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP
  */
 async function readFavoritesWithType(request, response) {
     const type = toNumber(request.params.type);

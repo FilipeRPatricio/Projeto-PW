@@ -7,8 +7,8 @@ const createFavoriteTypeCommand = "insert into `FavoriteType` (`Member`, `EventT
 /**
  * Adiciona um tipo de evento favorito a um membro.
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP 
  */
 export default async function createFavorite(request, response) {
     const member = toNumber(request.body.member);

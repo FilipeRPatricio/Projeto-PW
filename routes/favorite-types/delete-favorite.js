@@ -7,8 +7,8 @@ const deleteTypeCommand = "delete from `FavoriteType` where `Member` = ? and `Ev
 /**
  * Apaga o tipo de evento favorito com o id de membro e de tipo pedido.
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP
  */
 export default async function deleteFavorite(request, response) {
     const member = toNumber(request.body.member);

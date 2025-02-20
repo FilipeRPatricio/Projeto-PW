@@ -8,8 +8,8 @@ const commandSelectId = "select `id`, `description` from `Member` where `id` = ?
 /**
  * Mostra todos os membros ou o membro cujo id foi pedido. 
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP
  */
 async function readMembers(request, response) {
     const id = toNumber(request.params.id);
@@ -22,8 +22,8 @@ const selectAutoIncrementCommand = "select `AUTO_INCREMENT` from information_sch
 /**
  * Mostra o id atual do auto_increment da tabela Member.
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request 
+ * @param {Response} response 
  */
 async function membersAutoIncrement(request, response) {
     await sendResponse(response, selectAutoIncrementCommand, [], (result) => result);

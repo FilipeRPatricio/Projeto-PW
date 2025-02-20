@@ -533,27 +533,36 @@ class EventManager extends ElementManager {
     }
 
     /**
-     * Retorna um array com os ids dos membros inscritos no evento com o id recebido.
+     * Retorna um array com os membros inscritos no evento com o id recebido.
      * 
      * @param {number} eventId - O id do evento a procurar
-     * @returns Um array com os ids dos membros inscritos no evento
+     * @returns Um array com os membros inscritos no evento
      * @async
      */
-    // static async getRegisteredMembers(eventId) {
-    //     if (!eventId || isNaN(eventId)) { return; }
+    static async getRegisteredMembers(eventId) {
+        if (!eventId || isNaN(eventId)) { return; }
 
-    //     const registrations = await fetchJSON(`/registrations/event/${eventId}`, "GET");
-    //     let result = [];
-    //     console.log(result);
+        const registeredMembers = await fetchJSON(`/registrations/events/${eventId}`, "GET") || [];
+        let result = [];
 
-    //     if (registrations) {
-    //         registrations.forEach((registration) => {
-    //             result.push(registration.Member);
-    //         });
-    //     }
+        for (const reg of registeredMembers) {
+            result.push(await EventManager.getMemberById(reg.Member));
+        }
 
-    //     return result;
-    // }
+        return result;
+    }
+
+    /**
+     * Retorna um boolean dependendo se houver pelo menos um membro inscrito no evento com o id recebido.
+     * 
+     * @param {number} eventId - Id do evento a procurar
+     * @returns true se houver membros incritos, false caso contrário
+     * @async
+     */
+    static async eventHasMembersRegistered(eventId) {
+        const registeredMembers = await this.getRegisteredMembers(eventId);
+        return registeredMembers && registeredMembers.some(reg => reg);
+    }
 
     /**
      * Inicializa os botões e a tabela
@@ -680,14 +689,16 @@ class EventManager extends ElementManager {
 
     /**
      * Apaga um evento a partir do seu id.
-     * 
-     * @param {number} id - O id do evento a apagar
      */
-    async deleteEvent(id) {
-
+    async deleteSelectedEvent() {
         const selectedID = tableManager.getSelectedElementID();
         if (selectedID < 0) {
             alert("Selecione um evento.");
+            return;
+        }
+
+        if (await EventManager.eventHasMembersRegistered()) {
+            alert("Erro, evento tem membros inscritos.");
             return;
         }
 
@@ -699,14 +710,14 @@ class EventManager extends ElementManager {
     }
 
     /**
-     * Apaga um membro do clube a partir do seu id.
+     * Apaga um evento a partir do seu id.
      * 
-     * @param {number} id - O id do membro a apagar
+     * @param {number} id - O id do evento a apagar
      * @async
      */
     async deleteEvent(id) {
         await fetchJSON(`/events/${id}`, "DELETE");
-    }   
+    }
 
 
     /**
@@ -770,46 +781,6 @@ class EventManager extends ElementManager {
         const event = EventManager.eventList.find(ev => ev.id === selectedID);
         if (event) this.openModal(event);
     }
-
-    /**
-     * Apaga o evento selecionado.
-     * 
-     * @returns 
-     * @async
-     */
-    async deleteSelectedEvent() {
-        const selectedID = tableManager.getSelectedElementID();
-        if (selectedID < 0) {
-            alert("Selecione um evento.");
-            return;
-        }
-
-        const confirmed = confirm("Deseja mesmo apagar este evento?");
-        if (!confirmed) {return;}
-
-        if (MemberManager.hasMemberInEvent(selectedID)) {
-            alert("Não pode apagar o Evento, pois tem Membros inscritos!");
-            return;
-        }
-
-        try {
-            const response = await fetch(`http://localhost:5502/api/events/${selectedID}`, {
-                method: "DELETE",
-                headers:{"Content-Type": "application/json"}
-            });
-        
-            if(!response.ok) {
-                throw new Error("Erro ao apagar evento");
-            }
-
-            alert("Evento apagado com sucesso!");
-            EventManager.updateEventsTable();
-        } catch (error) {
-            console.error("Erro no frontend:", error);
-            alert("Erro ao apagar evento.");
-        }
-    }
-
     
     static getEventsWithTypes(...types) {
         return EventManager.eventList.filter(e => types.includes(e.type));
@@ -942,7 +913,7 @@ class MemberManager extends ElementManager {
         let result = [];
 
         for (const reg of registeredEvents) {
-            result.push(await EventManager.getEventById(reg.Event));
+            result.push(await EventManager.getMemberById(reg.Event));
         }
 
         return result;

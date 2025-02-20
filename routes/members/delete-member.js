@@ -7,8 +7,8 @@ const deleteMemberCommand = "delete from `Member` where `id` = ?";
 /**
  * Apaga o membro com o id pedido.
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP
  */
 export default async function deleteMember(request, response) {
     const id = toNumber(request.params.id);

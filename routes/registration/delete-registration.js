@@ -7,8 +7,8 @@ const deleteRegistrationCommand = "delete from `Registration` where `Event` = ? 
 /**
  * Apaga uma inscrição de um membro num evento com os id's pedidos.
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP
  */
 export default async function deleteRegistration(request, response) {
     const event = toNumber(request.body.event);

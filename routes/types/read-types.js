@@ -8,8 +8,8 @@ const commandSelectId = "select `id`, `description` from `EventType` where `id` 
 /**
  * Mostra todos os tipos de eventos ou o tipo cujo id foi pedido. 
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP
  */
 async function readTypes(request, response) {
     const id = toNumber(request.params.id);
@@ -24,8 +24,8 @@ const selectDescriptionCommand = "select `id`, `description` from `EventType` wh
 /**
  * Mostra os tipos de eventos com a descrição pedida.
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP 
  */
 async function readTypeWithDescription(request, response) {
     const description = toString(request.params.description);
@@ -44,8 +44,8 @@ const selectAutoIncrementCommand = "select `AUTO_INCREMENT` from information_sch
 /**
  * Mostra o id atual do auto_increment da tabela EventType.
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP
  */
 async function typesAutoIncrement(request, response) {
     await sendResponse(response, selectAutoIncrementCommand, [], (result) => result);

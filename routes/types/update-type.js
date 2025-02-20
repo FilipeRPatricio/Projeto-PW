@@ -7,8 +7,8 @@ const updateTypeCommand = "update `EventType` set `description` = ? where `id` =
 /**
  * Atualiza um tipo de evento com o id e descrição pedidos.
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP
  */
 export default async function updateType(request, response) {
     const id = toNumber(request.params.id);

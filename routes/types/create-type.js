@@ -7,8 +7,8 @@ const createTypeCommand = "insert into `EventType` (`description`) values (?)";
 /**
  * Cria um tipo de evento com a descrição do corpo do pedido.
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP
  */
 export default async function createType(request, response) {
     const description = toString(request.body.description);

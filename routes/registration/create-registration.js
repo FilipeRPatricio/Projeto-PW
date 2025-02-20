@@ -7,8 +7,8 @@ const createRegistrationCommand = "insert into `Registration` (`Event`, `Member`
 /**
  * Adiciona uma inscrição de um membro num evento.
  * 
- * @param {*} request 
- * @param {*} response 
+ * @param {Request} request - Pedido HTTP
+ * @param {Response} response - Resposta HTTP
  */
 export default async function createRegistration(request, response) {
     const event = toNumber(request.body.event);
