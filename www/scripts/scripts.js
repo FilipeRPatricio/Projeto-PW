@@ -507,6 +507,32 @@ class EventManager extends ElementManager {
         return events;
     }
 
+    async #createEventsTypeList(event) {
+        const eventsDropDownList = document.getElementById("events-type-list");
+
+        // Lista de eventos a mostrar
+        const eventList = await EventTypeManager.getTypes()
+
+        // Elemento placeholder com valor 0
+        if(!event){
+            let placeholder = document.createElement("option");
+            placeholder.textContent = "Escolha um Evento: ";
+            placeholder.value = 0;
+            eventsDropDownList.appendChild(placeholder);
+        }
+
+        for (const typeOfEvent of eventList) {
+
+            let eventType = document.createElement('option')
+            eventType.textContent = typeOfEvent.description
+            eventType.value = typeOfEvent.id
+            
+            if( event?.type === typeOfEvent.id) eventType.setAttribute("selected", true)   // "?" para se tiver algo undefined
+
+            eventsDropDownList.appendChild(eventType);
+        }
+    }
+
     /**
      * Atualiza a tabela com os eventos da base de dados.
      * 
@@ -649,7 +675,8 @@ class EventManager extends ElementManager {
     async openModal(event = null) {
 
         const id = document.getElementById("event-id");
-        const type = document.getElementById("event-type");
+        const type = document.getElementsByName("event-type");
+
         const description = document.getElementById("event-description");
         const date = document.getElementById("event-date");
 
@@ -664,6 +691,8 @@ class EventManager extends ElementManager {
         } else {
             id.value = await this.getAutoIncrementId();
         }
+
+        this.#createEventsTypeList(event);
 
         document.getElementById("event-modal")?.classList.remove("hidden");
     }
@@ -680,9 +709,9 @@ class EventManager extends ElementManager {
         }
 
         modal.classList.add("hidden");
-        document.getElementById("event-type").value = "";
         document.getElementById("event-description").value = "";
         document.getElementById("event-date").value = "";
+        document.getElementById("events-type-list").textContent = ""
     }
 
     /**
@@ -695,7 +724,7 @@ class EventManager extends ElementManager {
      * @async
      */
     async createEvent(type, description, date) {
-        const eventType = await EventTypeManager.getTypeByDescription(type);
+        const eventType = await EventTypeManager.getTypeById(type);
         if (!eventType) {
             alert("Tipo de evento não encontrado.")
             return;
@@ -738,30 +767,23 @@ class EventManager extends ElementManager {
      * @returns 
      */
     async saveEvent() {
-        const typeDescription = document.getElementById("event-type").value;
         const description = document.getElementById("event-description").value;
         const date = document.getElementById("event-date").value;
+        const eventType = document.getElementById("events-type-list").value;
 
-        if (!typeDescription || !description || !date) {
+        if (!description || !date || !eventType) {
             alert("Insira parâmetros válidos.");
-            return;
-        }
-
-        const type = await EventTypeManager.getTypeByDescription(typeDescription);
-
-        if (!type) {
-            alert("Tipo de evento não existe.");
             return;
         }
 
         const eventId = parseInt(document.getElementById("event-id")?.value);
     
         if (await EventManager.getEventById(eventId)) {
-            const existingEvent = await this.editEvent(eventId, type.id, description, date);
+            const existingEvent = await this.editEvent(eventId, eventType, description, date);
             console.log(existingEvent);
             await fetchJSON(`/events/${eventId}`, "PUT", existingEvent);
         } else {
-            await this.createEvent(type, description, date);
+            await this.createEvent(eventType, description, date);
         }
     
         this.closeModal();
