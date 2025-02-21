@@ -612,16 +612,17 @@ class EventManager extends ElementManager {
      * 
      * @param {number} eventId - O id do evento a procurar
      * @returns Um array com os membros inscritos no evento
+     * @static
      * @async
      */
     static async getRegisteredMembers(eventId) {
         if (!eventId || isNaN(eventId)) { return; }
 
-        const registeredMembers = await fetchJSON(`/registrations/events/${eventId}`, "GET") || [];
+        const registeredMembers = await fetchJSON(`/registrations/event/${eventId}`, "GET") || [];
         let result = [];
 
         for (const reg of registeredMembers) {
-            result.push(await EventManager.getMemberById(reg.Member));
+            result.push(await MemberManager.getMemberById(reg.Member));
         }
 
         return result;
@@ -635,8 +636,8 @@ class EventManager extends ElementManager {
      * @async
      */
     static async eventHasMembersRegistered(eventId) {
-        const registeredMembers = await this.getRegisteredMembers(eventId);
-        return registeredMembers && registeredMembers.some(reg => reg);
+        const registeredMembers = await EventManager.getRegisteredMembers(eventId);
+        return registeredMembers && registeredMembers.length > 0;
     }
 
     /**
@@ -761,9 +762,15 @@ class EventManager extends ElementManager {
      * @param {number} type - O id do novo tipo de evento
      * @param {string} description - A nova descrição do evento
      * @param {Date | string} date - A nova data do evento
+     * @returns O evento editado, ou undefined se ocorrer algum erro
+     * @async
      */
     async editEvent(id, type, description, date) {
         const event = await EventManager.getEventById(id);
+        const registrations = await EventManager.getRegisteredMembers(id);
+
+        if (registrations.length > 0) { return void 0; }
+
         if (event) {
             event.type = type;
             event.description = description;
@@ -797,23 +804,25 @@ class EventManager extends ElementManager {
             return;
         }
 
-
         // Verifica se a data é futura
         const selectedDate = new Date(date);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
         if (selectedDate < today) {
-        alert("A data do evento deve ser futura.");
-        return;
+            alert("A data do evento deve ser futura.");
+            return;
         }
-
 
         const eventId = parseInt(document.getElementById("event-id")?.value);
     
         if (await EventManager.getEventById(eventId)) {
             const existingEvent = await this.editEvent(eventId, eventType, description, date);
-            await fetchJSON(`/events/${eventId}`, "PUT", existingEvent);
+            
+            existingEvent ?
+            await fetchJSON(`/events/${eventId}`, "PUT", existingEvent) :
+            alert("Impossível editar, pois o evento tem membros inscritos.");
+
         } else {
             await this.createEvent(eventType, description, date);
         }
@@ -832,7 +841,7 @@ class EventManager extends ElementManager {
             return;
         }
 
-        if (await EventManager.eventHasMembersRegistered()) {
+        if (await EventManager.eventHasMembersRegistered(selectedID)) {
             alert("Erro, evento tem membros inscritos.");
             return;
         }
