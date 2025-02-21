@@ -18,14 +18,14 @@ Grant ALL PRIVILEGES on ESTSBike.* to PW;
 -- Tabela Tipo de Evento
 Create Table EventType (
 	ID int not null AUTO_INCREMENT,
-    Description varchar(100) not null,
+    Description varchar(100) unique not null,
     Primary key (ID)
 );
 
 -- Tabela Evento
 Create Table Event (
 	ID int not null AUTO_INCREMENT,
-    Type int unique not null,
+    Type int not null,
     Description varchar(100) not null,
     Date date not null,
     Primary key (ID),
@@ -90,3 +90,5 @@ Insert into FavoriteType (Member, EventType) values (3, 3);
 Insert into Registration (Event, Member) values (1, 1);
 Insert into Registration (Event, Member) values (2, 1);
 Insert into Registration (Event, Member) values (3, 3);
+
+set global information_schema_stats_expiry = 0;

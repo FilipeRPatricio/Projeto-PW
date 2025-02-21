@@ -17,8 +17,6 @@ async function readTypes(request, response) {
     await sendResponse(response, id === void 0 ? commandSelectAll : commandSelectId, id === void 0 ? [] : [id], (result) => result);
 }
 
-
-
 const selectDescriptionCommand = "select `id`, `description` from `EventType` where `description` = ?";
 
 /**
@@ -36,8 +34,6 @@ async function readTypeWithDescription(request, response) {
         sendError(response, 500, "Erro, descrição não encontrada");
     }
 }
-
-
 
 const selectAutoIncrementCommand = "select `AUTO_INCREMENT` from information_schema.tables where table_schema = 'ESTSBike' and table_name = 'EventType'";
 
