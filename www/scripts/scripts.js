@@ -1,9 +1,5 @@
 "use strict";
 
-/*
-    TODO: Verificações extra: i.e. datas que já passaram, tipos de eventos que já existem
-*/
-
 //#region Classe EventType
 
 /**
@@ -122,26 +118,6 @@ class Member {
         this.favoriteEventTypes = [];
         this.registeredEvents = [];
     }
-
-    /**
-     * Verifica se um membro tem um tipo de evento como favorito.
-     * 
-     * @param {number} type - O id do tipo de evento a procurar
-     * @returns true se tiver como favorito o tipo de evento, false caso não tenha
-     */
-    likesThisEventType(type) {
-        return !!this.favoriteEventTypes.find(t => t.id === type);
-    }
-
-    /**
-     * Verifica se um membro está registado no evento recebido.
-     * 
-     * @param {number} event - O id do evento a verificar
-     * @returns true se estiver inscrito, false caso não esteja
-     */
-    isRegisteredInEvent(event) {
-        return !!this.registeredEvents.find(e => e.id === event);
-    }
 }
 
 //#endregion
@@ -165,18 +141,6 @@ class ElementManager {}
 class EventTypeManager extends ElementManager {
 
     /**
-     * @property {EventType[]} typeList - Lista de tipos de eventos
-     * @static
-     */
-    static typeList = [];
-
-    /**
-     * @property {number} currentId - Id atual dos tipos de eventos
-     * @static
-     */
-    static currentId = 1;
-
-    /**
      * @constructs EventTypeManager
      */
     constructor() {
@@ -188,6 +152,7 @@ class EventTypeManager extends ElementManager {
      * Retorna todos os tipos de eventos.
      * 
      * @returns um array com todos os tipos de eventos
+     * @static
      * @async
      */
     static async getTypes() {
@@ -197,6 +162,7 @@ class EventTypeManager extends ElementManager {
     /**
      * Atualiza a tabela com os tipos de eventos da base de dados.
      * 
+     * @static
      * @async
      */
     static async updateTypesTable() {
@@ -212,6 +178,7 @@ class EventTypeManager extends ElementManager {
      * 
      * @param {number} id - O id a procurar
      * @returns EventType com o id ou undefined caso não exista
+     * @static
      * @async
      */
     static async getTypeById(id) {
@@ -225,6 +192,7 @@ class EventTypeManager extends ElementManager {
      * 
      * @param {string} description - A descrição a procurar
      * @returns EventType com a descrição ou undefined caso não exista
+     * @static
      * @async
      */
     static async getTypeByDescription(description) {
@@ -296,12 +264,16 @@ class EventTypeManager extends ElementManager {
      * 
      * @param {EventType} type - tipo de evento a editar
      * @param {string} newDescription - nova descrição do tipo de evento
-     * @returns o tipo de evento
+     * @returns O tipo de evento, ou undefined caso ocorra algum erro
+     * @async
      */
-    editType(type, newDescription) {
+    async editType(type, newDescription) {
+        if (await MemberManager.hasMemberWithFavorite(type.id)) { return void 0; }
+
         if (type) {
             type.description = newDescription;
         }
+
         return type;
     }
 
@@ -333,10 +305,16 @@ class EventTypeManager extends ElementManager {
         if (saveButton) {
             saveButton.addEventListener("click", async () => {
                 const descriptionInput = document.getElementById("eventTypeDescription");
-                const description = descriptionInput.value.trim();
 
+                const description = descriptionInput?.value.trim();
                 if (!description) {
                     alert("Por favor, insira uma descrição.");
+                    return;
+                }
+
+                const existingDescription = await EventTypeManager.getTypeByDescription(description);
+                if (existingDescription) {
+                    alert("Descrição do tipo de evento já existe.");
                     return;
                 }
 
@@ -344,10 +322,12 @@ class EventTypeManager extends ElementManager {
                 const existingType = await fetchJSON(`/types/${id}`, "GET");
 
                 // Criar ou editar novo tipo de evento e atualizar tabela
-                if (existingType.length !== 0) {
+                if (existingType.length > 0) {
+                    const editedType = await this.editType(existingType[0], description);
 
-                    const editedType = this.editType(existingType[0], description);
-                    await fetchJSON(`/types/${id}`, "PUT", editedType);
+                    editedType ?
+                    await fetchJSON(`/types/${id}`, "PUT", editedType) :
+                    alert("Impossível editar, pois existem membros com o tipo como favorito.");
 
                 } else {
                     const type = new EventType(id, description);
@@ -355,7 +335,7 @@ class EventTypeManager extends ElementManager {
                 }
 
                 // Fechar modal e limpar campo
-                document.getElementById("createEventTypeModal").classList.add("hidden");
+                document.getElementById("createEventTypeModal")?.classList.add("hidden");
                 descriptionInput.value = "";
 
                 EventTypeManager.updateTypesTable();
@@ -469,17 +449,6 @@ class EventTypeManager extends ElementManager {
  * @class Gestor de Eventos (criar, editar, apagar).
  */
 class EventManager extends ElementManager {
-    /**
-     * @property {Events[]} eventList - Lista de eventos disponíveis
-     * @static
-     */
-    static eventList = [];
-
-    /**
-     * @property {number} currentId - Id atual dos eventos
-     * @static
-     */
-    static currentId = 1;
 
     /**
      * @constructs EventManager
@@ -493,6 +462,7 @@ class EventManager extends ElementManager {
      * Retorna todos os eventos.
      * 
      * @returns um array com todos os eventos
+     * @static
      * @async
      */
     static async getEvents() {
@@ -527,6 +497,7 @@ class EventManager extends ElementManager {
      * Cria a lista de tipos de eventos para o modal dos eventos.
      * 
      * @param {Events} event - O evento a editar, ou null por default
+     * @async
      */
     async #createEventsTypeList(event = null) {
         const typesDropDownList = document.getElementById("events-type-list");
@@ -557,6 +528,7 @@ class EventManager extends ElementManager {
     /**
      * Atualiza a tabela com os eventos da base de dados.
      * 
+     * @static
      * @async
      */
     static async updateEventsTable() {
@@ -572,6 +544,7 @@ class EventManager extends ElementManager {
      * 
      * @param {number} eventId - O id do evento a procurar
      * @returns O evento com o id pedido
+     * @static
      * @async
      */
     static async getEventById(eventId) {
@@ -693,6 +666,7 @@ class EventManager extends ElementManager {
      * 
      * @param {Events} event - O evento a editar
      * @returns 
+     * @async
      */
     async openModal(event = null) {
 
@@ -783,6 +757,7 @@ class EventManager extends ElementManager {
      * Edita o evento selecionado.
      * 
      * @returns 
+     * @async
      */
     async editSelectedEvent() {
         const event = await this.getSelectedEvent();
@@ -793,6 +768,7 @@ class EventManager extends ElementManager {
      * Cria um novo evento com os dados inseridos.
      * 
      * @returns 
+     * @async
      */
     async saveEvent() {
         const description = document.getElementById("event-description").value;
@@ -818,7 +794,7 @@ class EventManager extends ElementManager {
     
         if (await EventManager.getEventById(eventId)) {
             const existingEvent = await this.editEvent(eventId, eventType, description, date);
-            
+
             existingEvent ?
             await fetchJSON(`/events/${eventId}`, "PUT", existingEvent) :
             alert("Impossível editar, pois o evento tem membros inscritos.");
@@ -833,6 +809,8 @@ class EventManager extends ElementManager {
 
     /**
      * Apaga um evento a partir do seu id.
+     * 
+     * @async
      */
     async deleteSelectedEvent() {
         const selectedID = tableManager.getSelectedElementID();
@@ -895,18 +873,6 @@ class MemberManager extends ElementManager {
     checkboxManager;
 
     /**
-     * @property {Member[]} memberList - Lista dos membros disponíveis
-     * @static
-     */
-    static memberList = [];
-
-    /**
-     * @property {number} currentId - Id atual dos membros
-     * @static
-     */
-    static currentId = 1;
-
-    /**
      * @constructs MemberManager
      * @param {CheckboxManager} checkboxManager - O Gestor para as Checkboxes de Tipos de Eventos
      */
@@ -920,6 +886,7 @@ class MemberManager extends ElementManager {
      * Retorna todos os membros.
      * 
      * @returns um array com todos os membros
+     * @static
      * @async
      */
     static async getMembers() {
@@ -929,6 +896,7 @@ class MemberManager extends ElementManager {
     /**
      * Atualiza a tabela com os membros da base de dados.
      * 
+     * @static
      * @async
      */
     static async updateMembersTable() {
@@ -1007,6 +975,7 @@ class MemberManager extends ElementManager {
      * 
      * @param {number} memberId - Id do membro a procurar
      * @returns Um array com os eventos não inscritos
+     * @async
      */
     async getUnregisteredEvents(memberId) {
         const favTypes = await this.getMemberFavoriteTypes(memberId);
@@ -1028,6 +997,7 @@ class MemberManager extends ElementManager {
      * @param {number} memberId - O id do membro a procurar
      * @param {number} eventId - O id do evento a procurar
      * @returns true se estiver inscrito, false caso contrário
+     * @async
      */
     async memberIsRegisteredInEvent(memberId, eventId) {
         const registeredEvents = await this.getRegisteredEvents(memberId);
@@ -1242,6 +1212,8 @@ class MemberManager extends ElementManager {
 
     /**
      * Aceita e cria ou apaga uma inscrição num evento consoante se ela já existe ou não.
+     * 
+     * @async
      */
     async #acceptRegistration() {
         const eventId = document.getElementById("events-list")?.value;
@@ -1714,7 +1686,6 @@ async function fetchJSON(url, method = "GET", body) {
         return void 0;
     }
 }
-
 
 /**
 * Retorna uma data em string no formato 'YYYY-MM-DD'.

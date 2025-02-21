@@ -91,4 +91,5 @@ Insert into Registration (Event, Member) values (1, 1);
 Insert into Registration (Event, Member) values (2, 1);
 Insert into Registration (Event, Member) values (3, 3);
 
+-- Update ao Information Schema instantâneo
 set global information_schema_stats_expiry = 0;
