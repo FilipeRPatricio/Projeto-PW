@@ -797,6 +797,18 @@ class EventManager extends ElementManager {
             return;
         }
 
+
+        // Verifica se a data é futura
+        const selectedDate = new Date(date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (selectedDate < today) {
+        alert("A data do evento deve ser futura.");
+        return;
+        }
+
+
         const eventId = parseInt(document.getElementById("event-id")?.value);
     
         if (await EventManager.getEventById(eventId)) {
