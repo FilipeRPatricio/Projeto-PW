@@ -506,6 +506,24 @@ class EventManager extends ElementManager {
     }
 
     /**
+     * Retorna uma lista com os eventos que têm o mesmo tipo que algum dos tipos favoritos recebidos.
+     * 
+     * @param {Array} typeList - A lista com os tipos favoritos de um membro
+     * @returns Um array com os eventos possíveis de se inscrever o membro
+     * @static
+     * @async
+     */
+    static async getEventsWithFavoriteTypes(typeList) {
+        let events = await fetchJSON("/events/all", "GET") || [];
+
+        let result = events.filter(
+            event => typeList.some(type => type.EventType == event.type)
+        );
+
+        return result || [];
+    }
+
+    /**
      * Cria a lista de tipos de eventos para o modal dos eventos.
      * 
      * @param {Events} event - O evento a editar, ou null por default
@@ -905,6 +923,7 @@ class MemberManager extends ElementManager {
      * 
      * @param {number} id - O id a procurar
      * @returns Member com o id ou undefined caso não exista
+     * @static
      * @async
      */
     static async getMemberById(id) {
@@ -945,7 +964,7 @@ class MemberManager extends ElementManager {
      * Retorna uma lista com os eventos em que o membro com o id pedido está inscrito.
      * 
      * @param {number} memberId - Id do membro a procurar
-     * @returns Um array com os ids dos eventos inscritos
+     * @returns Um array com os eventos inscritos
      * @async
      */
     async getRegisteredEvents(memberId) {
@@ -969,8 +988,11 @@ class MemberManager extends ElementManager {
      * @returns Um array com os eventos não inscritos
      */
     async getUnregisteredEvents(memberId) {
+        const favTypes = await this.getMemberFavoriteTypes(memberId);
+        if (!favTypes) { return; }
+
+        const allEvents = await EventManager.getEventsWithFavoriteTypes(favTypes);
         const registered = await this.getRegisteredEvents(memberId);
-        const allEvents = await EventManager.getEvents();
 
         let result = allEvents.filter(
             ev => !registered.some(event => event.id === ev.id)
@@ -989,6 +1011,18 @@ class MemberManager extends ElementManager {
     async memberIsRegisteredInEvent(memberId, eventId) {
         const registeredEvents = await this.getRegisteredEvents(memberId);
         return registeredEvents && registeredEvents.some(reg => reg.id == eventId);
+    }
+
+    /**
+     * Retorna os tipos favoritos do membro com o id recebido.
+     * 
+     * @param {number} memberId - O id do membro a procurar
+     * @returns Um array com os tipos de eventos favoritos
+     * @async
+     */
+    async getMemberFavoriteTypes(memberId) {
+        let result = await fetchJSON(`/favorites/${memberId}`, "GET");
+        return result || [];
     }
 
     /**
@@ -1083,7 +1117,7 @@ class MemberManager extends ElementManager {
      * @async
      */
     async updateFavoriteTypes(memberId, favoriteTypes = []) {
-        let typeList = await fetchJSON(`/favorites/${memberId}`, "GET");
+        let typeList = await this.getMemberFavoriteTypes(memberId);
 
         if (!typeList) { return; }
 
@@ -1276,7 +1310,15 @@ class MemberManager extends ElementManager {
         const id = parseInt(document.getElementById("member-id")?.value, 10); 
     
         if (await MemberManager.getMemberById(id)) {
+            const registeredEvents = await this.getRegisteredEvents(id);
+
+            if (!registeredEvents.length == 0 && !registeredEvents.some((e) => checkedTypes.some(t => t == e.type))) {
+                alert("Membro está inscrito num evento com esse tipo");
+                return;
+            }
+
             await this.editMember(id, description, checkedTypes);
+            
         } else {
             await this.createMember(description, checkedTypes);
         }
